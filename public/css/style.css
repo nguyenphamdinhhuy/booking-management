@@ -1088,7 +1088,7 @@ body {
     margin-left: 6px;
 }
 
-/* ✅ Responsive */
+
 @media (max-width: 1024px) {
     .room-card {
         width: calc(33.33% - 14px);
