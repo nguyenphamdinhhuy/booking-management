@@ -26,3 +26,7 @@ Route::get('/admin/dashboard', function () {
 route::get('/admin/add_room', function () {
     return view('admin.rooms.add_room');
 });
+
+route::get('/admin/rooms', function () {
+    return view('admin.rooms.rooms_management');
+});
