@@ -25,7 +25,7 @@ Route::get('/admin/dashboard', function () {
 });
 
 // Routes cho rooms
-Route::get('/admin/add_room', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.create');
+Route::get('/admin/rooms/create', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.create');
 
 Route::post('/admin/rooms', [rooms_controller::class, 'add_room_handle'])->name('admin.rooms.store');
 
