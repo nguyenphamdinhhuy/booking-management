@@ -22,6 +22,13 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="{{ route('services.index') }}" class="nav-link">
+                <i class="fa-tools"></i>
+                <span>Quản lý dịch vụ</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a href="#" class="nav-link">
                 <i class="fas fa-users"></i>
                 <span>Quản lý khách hàng</span>
