@@ -1,6 +1,19 @@
 @extends('admin.layouts.master')
 @section("content")
 
+{{-- Hiển thị thông báo --}}
+@if(session('success'))
+<div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">
+    {{ session('error') }}
+</div>
+@endif
+
 <h1 class="page-title">
     <i class="fas fa-bed"></i>
     Quản lý Phòng
@@ -10,13 +23,12 @@
 <div class="table-container">
     <!-- Table Header with Actions -->
     <div class="table-header">
-        <h2 class="table-title">Danh sách phòng</h2>
+        <h2 class="table-title">Danh sách phòng ({{ $rooms->count() }} phòng)</h2>
         <div class="table-actions">
-            <button class="btn btn-primary" onclick="openAddRoomModal()">
+            <a href="{{ route('admin.rooms.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i>
                 Thêm phòng mới
-            </button>
-            
+            </a>
         </div>
     </div>
 
@@ -74,72 +86,92 @@
                 </tr>
             </thead>
             <tbody id="roomsTableBody">
+                @forelse($rooms as $room)
                 <tr>
-                    <td>1</td>
-                    <td>Deluxe Suite</td>
+                    <td>{{ $room->r_id }}</td>
+                    <td><strong>{{ $room->name }}</strong></td>
                     <td>
                         <div class="room-images">
-                            <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=100&h=80&fit=crop"
-                                alt="Room 1" class="room-image" onclick="showImageModal(this.src)">
-                            <img src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=100&h=80&fit=crop"
-                                alt="Room 1" class="room-image" onclick="showImageModal(this.src)">
-                            <div class="more-images">+2</div>
+                            @if(count($room->images_array) > 0)
+                            @foreach($room->images_array as $index => $image)
+                            @if($index < 2)
+                                <img src="{{ asset($image) }}" alt="{{ $room->name }}"
+                                class="room-image" onclick="showImageModal('{{ asset($image) }}')"
+                                style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px; margin-right: 5px;">
+                                @endif
+                                @endforeach
+                                @if(count($room->images_array) > 2)
+                                <div class="more-images">+{{ count($room->images_array) - 2 }}</div>
+                                @endif
+                                @else
+                                <span style="color: #999; font-style: italic;">Không có ảnh</span>
+                                @endif
                         </div>
                     </td>
-                    <td><strong>1,500,000 VND</strong></td>
-                    <td>4</td>
-                    <td>2</td>
-                    <td><span class="status-badge status-inactive">Inactive</span></td>
-                    <td>Phòng suite cao cấp với view biển...</td>
-                    <td>15/01/2024</td>
+                    <td><strong>{{ $room->formatted_price }}</strong></td>
+                    <td>{{ $room->max_guests ?? 'N/A' }}</td>
+                    <td>{{ $room->number_beds ?? 'N/A' }}</td>
+                    <td>
+                        @if($room->status == 1)
+                        <span class="status-badge status-active">Hoạt động</span>
+                        @else
+                        <span class="status-badge status-inactive">Không hoạt động</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($room->description)
+                        {{ Str::limit($room->description, 50) }}
+                        @else
+                        <span style="color: #999; font-style: italic;">Chưa có mô tả</span>
+                        @endif
+                    </td>
+                    <td>{{ $room->formatted_created_at }}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="viewRoom(1)" title="Xem chi tiết">
+                            <a href="{{ route('admin.rooms.view', $room->r_id) }}" class="btn btn-primary btn-sm" title="Xem chi tiết">
                                 <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-warning btn-sm" onclick="editRoom(1)" title="Chỉnh sửa">
+                            </a>
+                            <button class="btn btn-warning btn-sm" title="Chỉnh sửa">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteRoom(1)" title="Xóa">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <form action="{{ route('admin.rooms.delete', $room->r_id) }}" method="POST" style="display: inline;"
+                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa phòng {{ $room->name }}?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
+                @empty
                 <tr>
-                    <td>2</td>
-                    <td>Standard Room</td>
-                    <td>
-                        <div class="room-images">
-                            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=100&h=80&fit=crop"
-                                alt="Room 2" class="room-image" onclick="showImageModal(this.src)">
-                            <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=100&h=80&fit=crop"
-                                alt="Room 2" class="room-image" onclick="showImageModal(this.src)">
-                        </div>
-                    </td>
-                    <td><strong>800,000 VND</strong></td>
-                    <td>2</td>
-                    <td>1</td>
-                    <td><span class="status-badge status-active">Active</span></td>
-                    <td>Phòng tiêu chuẩn tiện nghi đầy đủ...</td>
-                    <td>10/01/2024</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm" onclick="viewRoom(2)" title="Xem chi tiết">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-warning btn-sm" onclick="editRoom(2)" title="Chỉnh sửa">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteRoom(2)" title="Xóa">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+                    <td colspan="10" style="text-align: center; padding: 40px; color: #999;">
+                        <i class="fas fa-bed" style="font-size: 48px; margin-bottom: 10px; display: block;"></i>
+                        Chưa có phòng nào được tạo.
+                        <br><br>
+                        <a href="{{ route('admin.rooms.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Thêm phòng đầu tiên
+                        </a>
                     </td>
                 </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 </div>
+
+{{-- Modal xem ảnh --}}
+<div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);" onclick="closeImageModal()">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%;">
+        <img id="modalImage" style="width: 100%; height: auto; border-radius: 8px;">
+        <button onclick="closeImageModal()" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer;">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+
 
 @endsection
