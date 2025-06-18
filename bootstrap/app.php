@@ -15,7 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'checkrole' => \App\Http\Middleware\CheckRole::class,
         ]);
     })
-    
+
+    ->withProviders([
+        App\Providers\SocialiteServiceProvider::class,
+    ])
+
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

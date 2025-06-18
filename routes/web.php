@@ -62,3 +62,13 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Auth::routes(['verify' => true]);
 Route::post('/pending-register', [PendingRegisterController::class, 'register'])->name('pending.register');
 Route::get('/verify-account', [PendingRegisterController::class, 'verify']);
+use App\Http\Controllers\Auth\SocialController;
+
+Route::get('/auth/google', [SocialController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [SocialController::class, 'handleGoogleCallback']);
+
+
+
+Route::get('/auth/zalo', [SocialController::class, 'redirectToZalo']);
+Route::get('/auth/zalo/callback', [SocialController::class, 'handleZaloCallback']);
+

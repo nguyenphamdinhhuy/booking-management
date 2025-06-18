@@ -121,6 +121,10 @@
             <a href="{{ route('password.request') }}">Quên mật khẩu?</a><br>
             Chưa có tài khoản? <a href="{{ route('register') }}">Đăng ký</a>
         </div>
+        <div>
+            <a href="{{ url('/auth/google') }}">Đăng nhập bằng Google</a>
+            <a href="{{ url('/auth/zalo') }}">Đăng nhập bằng Zalo</a>
+        </div>
     </form>
 </div>
 @endsection
