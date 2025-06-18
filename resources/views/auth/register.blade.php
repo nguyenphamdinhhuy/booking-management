@@ -1,52 +1,127 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+@extends('layouts.app')
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+@section('content')
+    <style>
+        .form-wrapper {
+            max-width: 450px;
+            margin: 40px auto;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        .form-wrapper h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+        }
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+        }
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+        .form-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+        }
 
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
+        .btn-submit {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
 
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+        .form-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .form-footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <div class="form-wrapper">
+        <h2>Đăng ký tài khoản</h2>
+        <form method="POST" action="{{ route('pending.register') }}">
+
+            @csrf
+
+            <div class="form-group">
+                <label for="name" class="form-label">Họ tên</label>
+                <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required autofocus>
+                @error('name')
+                    <div class="form-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+                @error('email')
+                    <div class="form-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input id="password" type="password" class="form-control" name="password" required>
+                @error('password')
+                    <div class="form-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="password-confirm" class="form-label">Xác nhận mật khẩu</label>
+                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
+            </div>
+
+            <button type="submit" class="btn-submit">Đăng ký</button>
+
+            <div class="form-footer">
+                Đã có tài khoản? <a href="{{ route('login') }}">Đăng nhập</a>
+            </div>
+        </form>
+    </div>
+@endsection
