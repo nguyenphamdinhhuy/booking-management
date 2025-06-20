@@ -34,10 +34,12 @@ Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->gro
     Route::get('/rooms/create', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.create');
     Route::post('/rooms', [rooms_controller::class, 'add_room_handle'])->name('admin.rooms.store');
     Route::get('/rooms', [rooms_controller::class, 'rooms_management'])->name('admin.rooms.management');
-    Route::delete('/rooms/{id}', [rooms_controller::class, 'delete_room'])->name('admin.rooms.delete');
+    Route::get('/rooms/delete/{id}', [rooms_controller::class, 'delete_room'])->name('admin.rooms.delete');
     Route::get('/rooms/{id}', [rooms_controller::class, 'view_room'])->name('admin.rooms.view');
     Route::get('/add_room', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.add_room_form');
-
+    Route::get('/rooms/edit/{id}', [rooms_controller::class, 'edit_room_form'])->name('admin.rooms.edit');
+    Route::put('/rooms/{id}', [rooms_controller::class, 'edit_room_handle'])->name('admin.rooms.update');
+    
     // Service Categories
     Route::get('/service_categories', [serviceCategory_cotroller::class, 'index'])->name('service-categories.index');
     Route::get('/service_category', [serviceCategory_cotroller::class, 'create'])->name('service-categories.create');
@@ -62,6 +64,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Auth::routes(['verify' => true]);
 Route::post('/pending-register', [PendingRegisterController::class, 'register'])->name('pending.register');
 Route::get('/verify-account', [PendingRegisterController::class, 'verify']);
+
 use App\Http\Controllers\Auth\SocialController;
 
 Route::get('/auth/google', [SocialController::class, 'redirectToGoogle']);
@@ -71,4 +74,3 @@ Route::get('/auth/google/callback', [SocialController::class, 'handleGoogleCallb
 
 Route::get('/auth/zalo', [SocialController::class, 'redirectToZalo']);
 Route::get('/auth/zalo/callback', [SocialController::class, 'handleZaloCallback']);
-

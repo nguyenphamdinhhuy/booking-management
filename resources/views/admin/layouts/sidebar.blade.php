@@ -1,7 +1,5 @@
 <nav class="sidebar">
-    <div class="sidebar-header">
-        <h3>Menu Quản lý</h3>
-    </div>
+
     <ul class="nav-menu">
         <li class="nav-item">
             <a href="#" class="nav-link active">
@@ -16,14 +14,14 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('admin.rooms.management') }}" class="nav-link">
                 <i class="fas fa-bed"></i>
                 <span>Quản lý phòng</span>
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ route('services.index') }}" class="nav-link">
-                <i class="fa-tools"></i>
+                <i class="fas fa-box"></i>
                 <span>Quản lý dịch vụ</span>
             </a>
         </li>

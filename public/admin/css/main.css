@@ -638,7 +638,7 @@ body {
     border-bottom: 1px solid #e9ecef;
     display: flex;
     gap: 15px;
-    align-items: center;
+    align-items: end;
     flex-wrap: wrap;
 }
 
@@ -869,3 +869,4 @@ body {
     from { transform: translateY(-50px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+

@@ -1,0 +1,11 @@
+[33ma814f0a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull origin main: Fast-forward
+[33ma04df83[m HEAD@{1}: pull origin main: Fast-forward
+[33mc9566b7[m HEAD@{2}: commit: Fix bug không tìm thấy route
+[33m7654762[m HEAD@{3}: commit: Render giao diện admin, cấu hình authencation, chức năng thêm mới phòng và load danh sách phòng
+[33mb879bac[m HEAD@{4}: commit: fix bug không ăn css
+[33m41f6e9c[m HEAD@{5}: commit: Bổ sung giao diện trang quản lí phòng
+[33md41ffce[m HEAD@{6}: commit: Render giao diện admin
+[33mf6168c2[m HEAD@{7}: commit: Cài đặt Authencation
+[33m10c14eb[m HEAD@{8}: pull: Fast-forward
+[33m0c1650e[m HEAD@{9}: Branch: renamed refs/heads/master to refs/heads/main
+[33m0c1650e[m HEAD@{11}: commit (initial): Khởi tạo dự án

@@ -19,7 +19,7 @@ class CheckRole
         if (!Auth::check()) {
             return redirect('/login');
         }
-    
+
         $userRole = Auth::user()->role;
 
         switch ($userRole) {
@@ -46,5 +46,4 @@ class CheckRole
 
         return $next($request);
     }
-    
 }

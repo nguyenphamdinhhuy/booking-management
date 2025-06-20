@@ -10,9 +10,9 @@ class SocialiteServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        Socialite::extend('zalo', function ($app) {
-            $config = $app['config']['services.zalo'];
-            return Socialite::buildProvider(ZaloProvider::class, $config);
-        });
+        // Socialite::extend('zalo', function ($app) {
+        //     $config = $app['config']['services.zalo'];
+        //     return Socialite::buildProvider(ZaloProvider::class, $config);
+        // });
     }
 }
