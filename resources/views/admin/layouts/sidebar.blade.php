@@ -2,7 +2,7 @@
 
     <ul class="nav-menu">
         <li class="nav-item">
-            <a href="#" class="nav-link active">
+            <a href="#" class="nav-link">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
@@ -27,9 +27,9 @@
         </li>
 
         <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-users"></i>
-                <span>Quản lý khách hàng</span>
+            <a href="{{ route('service-categories.index') }}" class="nav-link">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <span>Quản lý loại dịch vụ</span>
             </a>
         </li>
         <li class="nav-item">

@@ -184,16 +184,16 @@ class rooms_controller extends Controller
             // Kiểm tra xem phòng có đang được đặt không (nếu có bảng bookings)
             // Uncomment phần này nếu bạn có bảng bookings
 
-            $hasActiveBookings = DB::table('bookings')
-                ->where('room_id', $id)
-                ->where('status', 'confirmed') // hoặc trạng thái tương ứng
-                ->where('check_out', '>=', now())
-                ->exists();
+            // $hasActiveBookings = DB::table('booking')
+            //     ->where('room_id', $id)
+            //     ->where('status', 'confirmed') // hoặc trạng thái tương ứng
+            //     ->where('check_out', '>=', now())
+            //     ->exists();
 
-            if ($hasActiveBookings) {
-                return redirect()->route('admin.rooms.management')
-                    ->with('error', 'Không thể xóa phòng đang có đặt phòng!');
-            }
+            // if ($hasActiveBookings) {
+            //     return redirect()->route('admin.rooms.management')
+            //         ->with('error', 'Không thể xóa phòng đang có đặt phòng!');
+            // }
 
 
             // Xóa ảnh khỏi thư mục nếu có

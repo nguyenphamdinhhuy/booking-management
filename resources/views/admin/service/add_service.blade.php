@@ -79,6 +79,8 @@
                 </div>
             </div>
 
+            <div id="imagePreview" class="image-preview"></div>
+
             <!-- Mô tả -->
             <div class="form-group full-width">
                 <label for="description" class="form-label">

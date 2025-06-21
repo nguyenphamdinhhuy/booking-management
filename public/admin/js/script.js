@@ -76,20 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==== FORM SUBMIT ====
     if (addRoomForm) {
         addRoomForm.addEventListener('submit', (e) => {
-            const name = document.getElementById('name').value.trim();
-            const price = document.getElementById('price_per_night').value;
-
-            if (!name) {
-                alert('Vui lòng nhập tên phòng!');
-                e.preventDefault();
-                return;
-            }
-
-            if (!price || parseFloat(price) <= 0) {
-                alert('Vui lòng nhập giá phòng hợp lệ!');
-                e.preventDefault();
-                return;
-            }
+            
 
             const submitBtn = addRoomForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;

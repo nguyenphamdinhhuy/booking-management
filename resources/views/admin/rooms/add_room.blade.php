@@ -42,7 +42,7 @@
                     Tên phòng <span class="required">*</span>
                 </label>
                 <input type="text" id="name" name="name" class="form-input" value="{{ old('name') }}"
-                    placeholder="VD: Phòng Deluxe 101" maxlength="50" required>
+                    placeholder="VD: Phòng Deluxe 101" maxlength="50">
             </div>
 
             <!-- Price per Night -->
@@ -52,7 +52,7 @@
                     Giá mỗi đêm (VNĐ) <span class="required">*</span>
                 </label>
                 <input type="number" id="price_per_night" name="price_per_night" class="form-input" value="{{ old('price_per_night') }}"
-                    placeholder="500000" min="0" step="1000" required>
+                    placeholder="500000" min="0" step="1000">
             </div>
 
             <!-- Max Guests -->
