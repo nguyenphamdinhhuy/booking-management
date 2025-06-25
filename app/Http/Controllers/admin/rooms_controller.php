@@ -16,7 +16,7 @@ class rooms_controller extends Controller
 
     public function add_room_handle(Request $request)
     {
-        // Validate dữ liệu - Sửa validation cho 1 ảnh
+        // Validate dữ liệu
         $validatedData = $request->validate([
             'name' => 'required|string|max:50',
             'price_per_night' => 'required|numeric|min:0',
@@ -24,7 +24,7 @@ class rooms_controller extends Controller
             'number_beds' => 'nullable|integer|min:1|max:10',
             'status' => 'required|boolean',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' // Đổi thành image (không phải images)
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ], [
             'name.required' => 'Tên phòng là bắt buộc',
             'name.max' => 'Tên phòng không được quá 50 ký tự',
@@ -42,7 +42,7 @@ class rooms_controller extends Controller
         try {
             DB::beginTransaction();
 
-            // Xử lý upload 1 hình ảnh vào public/uploads/rooms
+            // Xử lý upload hình ảnh
             $imagePath = null;
             if ($request->hasFile('image')) {
                 $destinationPath = public_path('uploads/rooms');
@@ -56,15 +56,17 @@ class rooms_controller extends Controller
                 $imagePath = 'uploads/rooms/' . $fileName;
             }
 
-            // Lưu vào DB - sửa theo cấu trúc bảng với 1 ảnh
+            // Lưu vào database
             DB::table('rooms')->insert([
                 'name' => $validatedData['name'],
                 'price_per_night' => $validatedData['price_per_night'],
                 'max_guests' => $validatedData['max_guests'] ?? null,
                 'number_beds' => $validatedData['number_beds'] ?? null,
-                'images' => $imagePath, // Lưu đường dẫn ảnh đơn (không phải JSON)
+                'images' => $imagePath,
                 'status' => $validatedData['status'],
                 'description' => $validatedData['description'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
 
             DB::commit();
@@ -123,7 +125,7 @@ class rooms_controller extends Controller
                 }
             }
 
-            // Tìm kiếm theo từ khóa (tên phòng hoặc mô tả)
+            // Tìm kiếm theo từ khóa
             if ($request->filled('search') && $request->search !== '') {
                 $searchTerm = '%' . $request->search . '%';
                 $query->where(function ($q) use ($searchTerm) {
@@ -141,10 +143,21 @@ class rooms_controller extends Controller
                 $room->formatted_price = number_format($room->price_per_night, 0, ',', '.') . ' VND';
 
                 // Format ngày tạo
-                $room->formatted_created_at = date('d/m/Y', strtotime($room->created_at));
+                if ($room->created_at) {
+                    $room->formatted_created_at = date('d/m/Y', strtotime($room->created_at));
+                }
+
+                // Tạo rating giả (có thể thay bằng dữ liệu thật từ bảng reviews)
+                $room->rating = round(rand(80, 95) / 10, 1);
+                $room->review_count = rand(100, 2000);
+
+                // Tạo discount giả
+                $room->discount_percent = rand(10, 30);
+                $room->old_price = $room->price_per_night * (1 + $room->discount_percent / 100);
+                $room->formatted_old_price = number_format($room->old_price, 0, ',', '.') . ' VND';
             }
 
-            // Nếu là AJAX request (cho tìm kiếm real-time)
+            // Nếu là AJAX request
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -168,6 +181,30 @@ class rooms_controller extends Controller
         }
     }
 
+    public function view_room($id)
+    {
+        try {
+            $room = DB::table('rooms')->where('r_id', $id)->first();
+
+            if (!$room) {
+                return redirect()->route('admin.rooms.management')
+                    ->with('error', 'Phòng không tồn tại!');
+            }
+
+            // Format dữ liệu để hiển thị
+            $room->formatted_price = number_format($room->price_per_night, 0, ',', '.') . ' VND';
+
+            if ($room->created_at) {
+                $room->formatted_created_at = date('d/m/Y H:i', strtotime($room->created_at));
+            }
+
+            return view('admin.rooms.view_room', compact('room'));
+        } catch (\Exception $e) {
+            return redirect()->route('admin.rooms.management')
+                ->with('error', 'Có lỗi khi load thông tin phòng: ' . $e->getMessage());
+        }
+    }
+
     public function delete_room($id)
     {
         try {
@@ -180,21 +217,6 @@ class rooms_controller extends Controller
                 return redirect()->route('admin.rooms.management')
                     ->with('error', 'Phòng không tồn tại!');
             }
-
-            // Kiểm tra xem phòng có đang được đặt không (nếu có bảng bookings)
-            // Uncomment phần này nếu bạn có bảng bookings
-
-            // $hasActiveBookings = DB::table('booking')
-            //     ->where('room_id', $id)
-            //     ->where('status', 'confirmed') // hoặc trạng thái tương ứng
-            //     ->where('check_out', '>=', now())
-            //     ->exists();
-
-            // if ($hasActiveBookings) {
-            //     return redirect()->route('admin.rooms.management')
-            //         ->with('error', 'Không thể xóa phòng đang có đặt phòng!');
-            // }
-
 
             // Xóa ảnh khỏi thư mục nếu có
             if ($room->images) {
@@ -224,12 +246,9 @@ class rooms_controller extends Controller
         }
     }
 
-    // Thêm vào rooms_controller.php
-
     public function edit_room_form($id)
     {
         try {
-            // Lấy thông tin phòng theo ID
             $room = DB::table('rooms')->where('r_id', $id)->first();
 
             if (!$room) {
@@ -313,7 +332,7 @@ class rooms_controller extends Controller
             ]);
 
             if ($updated) {
-                // Xóa ảnh cũ nếu có ảnh mới và ảnh cũ tồn tại
+                // Xóa ảnh cũ nếu có ảnh mới
                 if ($oldImagePath && $imagePath !== $oldImagePath) {
                     $absoluteOldPath = public_path($oldImagePath);
                     if (file_exists($absoluteOldPath)) {
@@ -332,7 +351,7 @@ class rooms_controller extends Controller
         } catch (\Exception $e) {
             DB::rollback();
 
-            // Xóa ảnh mới upload nếu có lỗi và ảnh mới khác ảnh cũ
+            // Xóa ảnh mới upload nếu có lỗi
             if (isset($imagePath) && $imagePath !== $room->images) {
                 $absolutePath = public_path($imagePath);
                 if (file_exists($absolutePath)) {
@@ -343,5 +362,238 @@ class rooms_controller extends Controller
             return redirect()->back()->withInput()
                 ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
+    }
+
+    public function user_home(Request $request)
+    {
+        try {
+            // Khởi tạo query builder - chỉ lấy phòng có status = 1 (active) và available = true
+            $query = DB::table('rooms')
+                ->select('*')
+                ->where('status', 1)
+                ->where('available', true);
+
+            // Filter theo số khách (nếu user chọn)
+            if ($request->filled('guests') && $request->guests > 0) {
+                $query->where('max_guests', '>=', $request->guests);
+            }
+
+            // Filter theo khoảng giá
+            if ($request->filled('min_price') && $request->min_price > 0) {
+                $query->where('price_per_night', '>=', $request->min_price);
+            }
+
+            if ($request->filled('max_price') && $request->max_price > 0) {
+                $query->where('price_per_night', '<=', $request->max_price);
+            }
+
+            // Filter theo vị trí
+
+
+            // Tìm kiếm theo từ khóa
+            if ($request->filled('search') && $request->search !== '') {
+                $searchTerm = '%' . $request->search . '%';
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', $searchTerm)
+                        ->orWhere('description', 'LIKE', $searchTerm);
+                });
+            }
+
+            // Sắp xếp theo tiêu chí
+            $sortBy = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            switch ($sortBy) {
+                case 'price_low':
+                    $query->orderBy('price_per_night', 'asc');
+                    break;
+                case 'price_high':
+                    $query->orderBy('price_per_night', 'desc');
+                    break;
+                case 'popular':
+                    // Sắp xếp ngẫu nhiên để mô phỏng độ phổ biến
+                    $query->inRandomOrder();
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+            }
+
+            // Phân trang hoặc limit
+            $perPage = $request->get('per_page', 12);
+            $rooms = $query->limit($perPage)->get();
+
+            // Xử lý format dữ liệu cho từng phòng
+            foreach ($rooms as $room) {
+                // Format giá tiền
+                $room->formatted_price = number_format($room->price_per_night, 0, ',', '.') . ' VND';
+
+                // Tạo giá cũ với discount (có thể lấy từ bảng promotions thực tế)
+                $room->discount_percent = rand(10, 30);
+                $room->old_price = $room->price_per_night * (1 + $room->discount_percent / 100);
+                $room->formatted_old_price = number_format($room->old_price, 0, ',', '.') . ' VND';
+
+                // Tạo rating giả (trong thực tế nên lấy từ bảng reviews)
+                $room->rating = round(rand(40, 50) / 10, 1); // 4.0 - 5.0
+                $room->review_count = rand(50, 500);
+
+                // Format ngày tạo
+                if ($room->created_at) {
+                    $room->formatted_created_at = date('d/m/Y', strtotime($room->created_at));
+                }
+
+                // Xử lý hình ảnh - kiểm tra file có tồn tại không
+                if ($room->images) {
+                    $imagePath = public_path($room->images);
+                    if (!file_exists($imagePath)) {
+                        $room->images = null; // Set null nếu file không tồn tại
+                    }
+                }
+
+                // Tạo URL cho hình ảnh mặc định nếu không có ảnh
+                if (!$room->images) {
+                    $room->images = 'assets/images/default-room.jpg'; // Đường dẫn ảnh mặc định
+                }
+
+                // Thêm thông tin bổ sung
+                $room->is_new = (strtotime($room->created_at) > strtotime('-7 days'));
+                $room->facilities = ['WiFi', 'Điều hòa', 'TV', 'Tủ lạnh']; // Có thể lấy từ bảng facilities
+            }
+
+            // Lấy thống kê tổng quan
+            $totalRooms = DB::table('rooms')->where('status', 1)->where('available', true)->count();
+            $avgPrice = DB::table('rooms')->where('status', 1)->where('available', true)->avg('price_per_night');
+
+            $stats = [
+                'total_rooms' => $totalRooms,
+                'avg_price' => number_format($avgPrice, 0, ',', '.') . ' VND',
+                'min_price' => number_format(DB::table('rooms')->where('status', 1)->where('available', true)->min('price_per_night'), 0, ',', '.') . ' VND',
+                'max_price' => number_format(DB::table('rooms')->where('status', 1)->where('available', true)->max('price_per_night'), 0, ',', '.') . ' VND'
+            ];
+
+            // Nếu là AJAX request (cho filter động)
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'rooms' => $rooms,
+                    'stats' => $stats,
+                    'count' => $rooms->count()
+                ]);
+            }
+
+            // Trả về view
+            return view('user.home', compact('rooms', 'stats'));
+        } catch (\Exception $e) {
+            // Log lỗi
+            \Log::error('Error loading rooms for user home: ' . $e->getMessage());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Có lỗi khi tải danh sách phòng'
+                ]);
+            }
+
+            return view('user.home')
+                ->with('error', 'Có lỗi khi tải danh sách phòng')
+                ->with('rooms', collect([]))
+                ->with('stats', [
+                    'total_rooms' => 0,
+                    'avg_price' => '0 VND',
+                    'min_price' => '0 VND',
+                    'max_price' => '0 VND'
+                ]);
+        }
+    }
+
+    // Method bổ sung để lấy phòng nổi bật
+    public function get_featured_rooms($limit = 6)
+    {
+        try {
+            $featuredRooms = DB::table('rooms')
+                ->select('*')
+                ->where('status', 1)
+                ->where('available', true)
+                ->orderBy('created_at', 'desc')
+                ->limit($limit)
+                ->get();
+
+            // Format dữ liệu tương tự như method user_home
+            foreach ($featuredRooms as $room) {
+                $room->formatted_price = number_format($room->price_per_night, 0, ',', '.') . ' VND';
+                $room->rating = round(rand(40, 50) / 10, 1);
+                $room->review_count = rand(50, 500);
+
+                if (!$room->images || !file_exists(public_path($room->images))) {
+                    $room->images = 'assets/images/default-room.jpg';
+                }
+            }
+
+            return $featuredRooms;
+        } catch (\Exception $e) {
+            \Log::error('Error loading featured rooms: ' . $e->getMessage());
+            return collect([]);
+        }
+    }
+
+    // Method để lấy chi tiết một phòng
+    public function room_detail($id)
+    {
+        try {
+            $room = DB::table('rooms')
+                ->where('r_id', $id)
+                ->where('status', 1)
+                ->where('available', true)
+                ->first();
+
+            if (!$room) {
+                return redirect()->route('user.home')
+                    ->with('error', 'Phòng không tồn tại hoặc không khả dụng!');
+            }
+
+            // Format dữ liệu chi tiết
+            $room->formatted_price = number_format($room->price_per_night, 0, ',', '.') . ' VND';
+            $room->rating = round(rand(40, 50) / 10, 1);
+            $room->review_count = rand(50, 500);
+
+            if ($room->created_at) {
+                $room->formatted_created_at = date('d/m/Y H:i', strtotime($room->created_at));
+            }
+
+            if (!$room->images || !file_exists(public_path($room->images))) {
+                $room->images = 'assets/images/default-room.jpg';
+            }
+
+            // Lấy phòng liên quan (cùng khoảng giá)
+            $relatedRooms = DB::table('rooms')
+                ->where('r_id', '!=', $id)
+                ->where('status', 1)
+                ->where('available', true)
+                ->whereBetween('price_per_night', [
+                    $room->price_per_night * 0.8,
+                    $room->price_per_night * 1.2
+                ])
+                ->limit(4)
+                ->get();
+
+            foreach ($relatedRooms as $relatedRoom) {
+                $relatedRoom->formatted_price = number_format($relatedRoom->price_per_night, 0, ',', '.') . ' VND';
+                $relatedRoom->rating = round(rand(40, 50) / 10, 1);
+
+                if (!$relatedRoom->images || !file_exists(public_path($relatedRoom->images))) {
+                    $relatedRoom->images = 'assets/images/default-room.jpg';
+                }
+            }
+
+            return view('user.room_detail', compact('room', 'relatedRooms'));
+        } catch (\Exception $e) {
+            \Log::error('Error loading room detail: ' . $e->getMessage());
+            return redirect()->route('user.home')
+                ->with('error', 'Có lỗi khi tải thông tin phòng');
+        }
+    }
+
+    function payment() {
+        return view('user.payment');
+    
     }
 }

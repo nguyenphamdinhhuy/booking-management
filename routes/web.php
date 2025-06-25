@@ -10,7 +10,12 @@ use App\Http\Controllers\Auth\PendingRegisterController;
 
 
 // Trang người dùng
-Route::get('/', fn() => view('user.home'));
+
+Route::get('/', [rooms_controller::class, 'user_home'])->name('home');
+route::get('/detail/{id}', [rooms_controller::class, 'room_detail'])->name('rooms_detail');
+route::get('/payment', [rooms_controller::class, 'payment'])->name('payment');
+
+
 
 // Dashboard người dùng
 Route::get('/dashboard', fn() => view('dashboard'))
@@ -74,3 +79,4 @@ Route::get('/auth/google/callback', [SocialController::class, 'handleGoogleCallb
 
 Route::get('/auth/zalo', [SocialController::class, 'redirectToZalo']);
 Route::get('/auth/zalo/callback', [SocialController::class, 'handleZaloCallback']);
+

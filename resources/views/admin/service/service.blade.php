@@ -28,7 +28,7 @@
         <h2 class="table-title">Danh sách dịch vụ</h2>
         <div class="table-actions">
 
-            <a class="btn btn-primary" onclick="openAddRoomModal()" href="{{ route('service.create') }}"
+            <a class="btn btn-primary" href="{{ route('service.create') }}"
                 class="btn btn-primary">
                 <i class="fas fa-plus"></i>Thêm dịch vụ</a>
         </div>
@@ -121,5 +121,5 @@
         </table>
     </div>
 </div>
-
+<div id="routeContainer" data-url="{{ route('admin.rooms.management') }}"></div>
 @endsection
