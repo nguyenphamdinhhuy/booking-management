@@ -17,8 +17,6 @@
       <a href="{{ route('login') }}" class="bk-header__action-btn bk-header__action-login">Đăng nhập</a>
     @else
       <span>Chào, {{ Auth::user()->name }}</span>
-      <span>Chào, {{ Auth::user()->role }}</span>
-
       <form method="POST" action="{{ route('logout') }}" style="display: inline;">
       @csrf
       <button type="submit" class="bk-header__action-btn">Đăng xuất</button>

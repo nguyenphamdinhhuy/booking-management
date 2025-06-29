@@ -14,26 +14,39 @@ class SocialController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
+    // App\Http\Controllers\Auth\SocialController.php
+
     public function handleGoogleCallback()
     {
-        try {
-            $googleUser = Socialite::driver('google')->user();
+        $googleUser = Socialite::driver('google')->stateless()->user();
 
-            $user = User::firstOrCreate(
-                ['email' => $googleUser->getEmail()],
-                [
-                    'name' => $googleUser->getName(),
-                    'password' => bcrypt('password'),
-                    'google_id' => $googleUser->getId(),
-                ]
-            );
+        // Tìm hoặc tạo user
+        $user = User::updateOrCreate(
+            ['email' => $googleUser->getEmail()],
+            [
+                'name' => $googleUser->getName(),
+                'google_id' => $googleUser->getId(),
+                'password' => bcrypt(uniqid()),
+            ]
+        );
+        
+        
 
-            Auth::login($user);
-            return redirect('/');
-        } catch (\Exception $e) {
-            return redirect('/login')->withErrors(['login' => 'Lỗi đăng nhập Google']);
+        Auth::login($user);
+
+        switch ($user->role) {
+            case 'admin':
+                return redirect('/admin/dashboard');
+            case 'staff':
+                return redirect('/staff/dashboard');
+            case 'user':
+                return redirect('/');
+            default:
+                Auth::logout();
+                return redirect('/login');
         }
     }
+
 
     public function redirectToZalo()
     {
