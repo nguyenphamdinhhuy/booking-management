@@ -99,28 +99,23 @@
                 <span class="detail-price-unit">VNĐ/đêm</span>
             </div>
 
-            <form class="detail-booking-form">
+            <form class="detail-booking-form" method="GET" action="{{ route('payment') }}" onsubmit="return validateVoucher();">
                 <div class="detail-form-group">
                     <label class="detail-form-label">Ngày nhận - trả phòng</label>
                     <div class="detail-date-inputs">
-                        <input type="date" class="detail-form-input" id="checkin-date" required>
-                        <input type="date" class="detail-form-input" id="checkout-date" required>
+                        <input type="date" class="detail-form-input" id="checkin-date" name="checkin" required>
+                        <input type="date" class="detail-form-input" id="checkout-date" name="checkout" required>
                     </div>
                 </div>
-
                 <div class="detail-form-group">
-                    <label class="detail-form-label">Số khách</label>
-                    <div class="detail-guests-input">
-                        <span>Khách</span>
-                        <div class="detail-guest-controls">
-                            <button type="button" class="detail-guest-btn" id="decrease-guests">-</button>
-                            <span id="guest-count">2</span>
-                            <button type="button" class="detail-guest-btn" id="increase-guests">+</button>
-                        </div>
-                    </div>
+                    <label class="detail-form-label">Mã giảm giá</label>
+                    <input type="text" class="detail-form-input" name="discount_code" id="discount-code" placeholder="Nhập mã giảm giá nếu có">
+                    <span id="voucher-error" style="color: #e53935; font-size: 13px; display: none;"></span>
                 </div>
-
-                <a href="{{ route('payment') }}" type="submit" class="detail-book-btn">Đặt phòng ngay</a>
+                <input type="hidden" name="guests" id="guests-hidden" value="2">
+                <input type="hidden" name="r_id" value="{{ $room->r_id }}">
+                <input type="hidden" name="total_price" id="total-price-hidden" value="">
+                <button type="submit" class="detail-book-btn">Đặt phòng ngay</button>
             </form>
 
             <p class="detail-booking-note">Không tính phí hủy trong 24h</p>
@@ -164,4 +159,31 @@
     </div>
 
 </div>
+<script>
+    // Tính tổng giá trị đơn hàng khi submit (giả sử đơn giá * số đêm)
+    document.querySelector('.detail-booking-form').onsubmit = function(e) {
+        const checkin = document.getElementById('checkin-date').value;
+        const checkout = document.getElementById('checkout-date').value;
+        const pricePerNight = {
+            {
+                $room - > price_per_night
+            }
+        };
+        if (checkin && checkout) {
+            const nights = (new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24);
+            document.getElementById('total-price-hidden').value = nights > 0 ? nights * pricePerNight : pricePerNight;
+        }
+    };
+
+    function validateVoucher() {
+        var code = document.getElementById('discount-code').value.trim();
+        if (code.length > 0) {
+            // Có thể kiểm tra định dạng mã ở đây nếu muốn
+            // Nếu muốn kiểm tra mã hợp lệ ngay tại client, cần AJAX, còn không thì để backend xử lý
+            // Ở đây chỉ reset lỗi
+            document.getElementById('voucher-error').style.display = 'none';
+        }
+        return true;
+    }
+</script>
 @endsection

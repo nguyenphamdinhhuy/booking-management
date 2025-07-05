@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class rooms_controller extends Controller
 {
@@ -592,8 +595,368 @@ class rooms_controller extends Controller
         }
     }
 
-    function payment() {
-        return view('user.payment');
-    
+    public function payment(Request $request)
+    {
+        $user = auth()->user();
+        $room = null;
+        $roomId = $request->input('r_id');
+        if ($roomId) {
+            $room = DB::table('rooms')->where('r_id', $roomId)->first();
+        }
+        $checkin = $request->input('checkin');
+        $checkout = $request->input('checkout');
+        $guests = $request->input('guests');
+        $discount_code = $request->input('discount_code');
+        $voucher = null;
+        $discount_percent = 0;
+        $discount_amount = 0;
+        $total_price = 0;
+
+        // Tính số đêm
+        if ($room && $checkin && $checkout) {
+            $nights = (strtotime($checkout) - strtotime($checkin)) / 86400;
+            if ($nights < 1) $nights = 1;
+            $total_price = $nights * $room->price_per_night;
+
+            // Kiểm tra mã giảm giá
+            if ($discount_code) {
+                $voucher = DB::table('vouchers')
+                    ->where('v_code', $discount_code)
+                    ->where('status', 1)
+                    ->where('start_date', '<=', now())
+                    ->where('end_date', '>=', now())
+                    ->first();
+                if ($voucher) {
+                    $discount_percent = $voucher->discount_percent;
+                    $discount_amount = round($total_price * $discount_percent / 100);
+                }
+            }
+        }
+
+        return view('user.payment', [
+            'user' => $user,
+            'room' => $room,
+            'checkin' => $checkin,
+            'checkout' => $checkout,
+            'guests' => $guests,
+            'total_price' => $total_price,
+            'discount_code' => $discount_code,
+            'discount_percent' => $discount_percent,
+            'discount_amount' => $discount_amount,
+            'voucher' => $voucher,
+        ]);
+    }
+
+    public function processPayment(Request $request)
+    {
+        try {
+            // Validate dữ liệu
+            $request->validate([
+                'r_id' => 'required|exists:rooms,r_id',
+                'checkin' => 'required|date',
+                'checkout' => 'required|date|after:checkin',
+                'guests' => 'required|integer|min:1',
+                'total_price' => 'required|numeric|min:0',
+                'payment_method' => 'required|string'
+            ]);
+
+            $user = Auth::user();
+            $room = DB::table('rooms')->where('r_id', $request->r_id)->first();
+
+            if (!$room) {
+                return redirect()->back()->with('error', 'Phòng không tồn tại!');
+            }
+
+            // Tính toán giá tiền
+            $nights = (strtotime($request->checkout) - strtotime($request->checkin)) / 86400;
+            if ($nights < 1) $nights = 1;
+
+            $totalPrice = $nights * $room->price_per_night;
+            $discountAmount = $request->discount_amount ?? 0;
+            $finalAmount = $totalPrice - $discountAmount;
+
+            // Xử lý theo phương thức thanh toán
+            switch ($request->payment_method) {
+                case 'vnpay':
+                    return $this->processVNPayPayment($request, $user, $room, $finalAmount);
+                    break;
+                case 'momo':
+                    return $this->processMoMoPayment($request, $user, $room, $finalAmount);
+                    break;
+                case 'bank':
+                    return $this->processBankTransfer($request, $user, $room, $finalAmount);
+                    break;
+                default:
+                    return redirect()->back()->with('error', 'Phương thức thanh toán không hợp lệ!');
+            }
+        } catch (\Exception $e) {
+            Log::error('Payment processing error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xử lý thanh toán!');
+        }
+    }
+
+    private function processVNPayPayment($request, $user, $room, $amount)
+    {
+        // Thông tin VNPay
+        $vnp_TmnCode = "1TFT191D";
+        $vnp_HashSecret = "1OVMPGLZGJNAJW4PYC2SRK4MGSI1PWJQ";
+        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+        $vnp_ReturnUrl = route('vnpay.return');
+
+        // Tạo mã đơn hàng duy nhất
+        $vnp_TxnRef = 'BOOKING_' . time() . '_' . $user->id;
+
+        // Lưu thông tin booking tạm thời vào session
+        session([
+            'booking_data' => [
+                'u_id' => $user->id,
+                'r_id' => $request->r_id,
+                'check_in_date' => $request->checkin,
+                'check_out_date' => $request->checkout,
+                'guests' => $request->guests,
+                'total_price' => $amount,
+                'discount_code' => $request->discount_code,
+                'discount_amount' => $request->discount_amount,
+                'payment_method' => 'vnpay',
+                'vnp_TxnRef' => $vnp_TxnRef
+            ]
+        ]);
+
+        // Tạo các tham số cho VNPay
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $amount * 100, // VNPay yêu cầu amount * 100
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $request->ip(),
+            "vnp_Locale" => "vn",
+            "vnp_OrderInfo" => "Thanh toan dat phong " . $room->name,
+            "vnp_OrderType" => "other",
+            "vnp_ReturnUrl" => $vnp_ReturnUrl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+        );
+
+        // Sắp xếp tham số
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+
+        $vnp_Url = $vnp_Url . "?" . $query;
+
+        // Tạo secure hash
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+
+        // Redirect đến VNPay
+        return redirect($vnp_Url);
+    }
+
+    public function bookingSuccess($id)
+    {
+        try {
+            // Lấy thông tin booking
+            $booking = DB::table('booking')->where('b_id', $id)->first();
+
+            if (!$booking) {
+                return redirect()->route('index')->with('error', 'Không tìm thấy thông tin đặt phòng!');
+            }
+
+            // Kiểm tra quyền truy cập - chỉ user đã đặt mới được xem
+            if ($booking->u_id != Auth::id()) {
+                return redirect()->route('index')->with('error', 'Bạn không có quyền xem thông tin này!');
+            }
+
+            // Lấy thông tin user
+            $user = DB::table('users')->where('id', $booking->u_id)->first();
+
+            // Lấy thông tin phòng từ booking_details hoặc từ session
+            $room = null;
+            $details = null;
+            $voucher = null;
+
+            // Kiểm tra nếu có bảng booking_details
+            $bookingDetails = DB::table('booking_details')->where('b_id', $id)->first();
+
+            if ($bookingDetails) {
+                $room = DB::table('rooms')->where('r_id', $bookingDetails->r_id)->first();
+                $details = $bookingDetails;
+
+                // Lấy thông tin voucher nếu có
+                if ($bookingDetails->v_id) {
+                    $voucher = DB::table('vouchers')->where('v_id', $bookingDetails->v_id)->first();
+                }
+            } else {
+                // Fallback: lấy từ session nếu vẫn còn
+                $bookingData = session('booking_data');
+                if ($bookingData) {
+                    $room = DB::table('rooms')->where('r_id', $bookingData['r_id'])->first();
+                    $details = (object) $bookingData;
+
+                    if ($bookingData['discount_code']) {
+                        $voucher = DB::table('vouchers')->where('v_code', $bookingData['discount_code'])->first();
+                    }
+                }
+            }
+
+            // Format dữ liệu
+            if ($room) {
+                $room->formatted_price = number_format($room->price_per_night, 0, ',', '.') . ' VND';
+            }
+
+            // Tính số đêm
+            $nights = 1;
+            if ($booking->check_in_date && $booking->check_out_date) {
+                $nights = (strtotime($booking->check_out_date) - strtotime($booking->check_in_date)) / 86400;
+                if ($nights < 1) $nights = 1;
+            }
+
+            // Format ngày tháng
+            $booking->formatted_check_in = date('d/m/Y', strtotime($booking->check_in_date));
+            $booking->formatted_check_out = date('d/m/Y', strtotime($booking->check_out_date));
+            $booking->formatted_total_price = number_format($booking->total_price, 0, ',', '.') . ' VND';
+            $booking->nights = $nights;
+
+            return view('user.booking-success', compact('booking', 'user', 'room', 'details', 'voucher'));
+        } catch (\Exception $e) {
+            Log::error('Booking success page error: ' . $e->getMessage());
+            return redirect()->route('index')->with('error', 'Có lỗi xảy ra khi tải thông tin đặt phòng!');
+        }
+    }
+
+    // Cập nhật lại phần xử lý VNPay return
+    public function vnpayReturn(Request $request)
+    {
+        $vnp_HashSecret = "1OVMPGLZGJNAJW4PYC2SRK4MGSI1PWJQ";
+
+        $inputData = [];
+        foreach ($request->all() as $key => $value) {
+            if (substr($key, 0, 4) == "vnp_") {
+                $inputData[$key] = $value;
+            }
+        }
+
+        $vnp_SecureHash = $inputData['vnp_SecureHash'];
+        unset($inputData['vnp_SecureHash']);
+        ksort($inputData);
+
+        $hashData = "";
+        $i = 0;
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashData .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashData .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+        }
+
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+
+        try {
+            if ($secureHash == $vnp_SecureHash) {
+                $bookingData = session('booking_data');
+
+                if (!$bookingData) {
+                    return redirect()->route('index')->with('error', 'Không tìm thấy thông tin đặt phòng!');
+                }
+
+                if ($request->vnp_ResponseCode == '00') {
+                    // Thanh toán thành công
+                    DB::beginTransaction();
+
+                    // Tạo mã đơn b_id random 8 ký tự
+                    $bookingId = strtoupper(Str::random(8));
+
+                    // Thêm booking
+                    DB::table('booking')->insert([
+                        'b_id' => $bookingId,
+                        'u_id' => $bookingData['u_id'],
+                        'check_in_date' => $bookingData['check_in_date'],
+                        'check_out_date' => $bookingData['check_out_date'],
+                        'status' => 1, // Đã thanh toán
+                        'total_price' => $bookingData['total_price'],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    // Thêm chi tiết booking (nếu có bảng booking_details)
+                    // Uncomment phần này nếu bạn có bảng booking_details
+                    /*
+                DB::table('booking_details')->insert([
+                    'b_id' => $bookingId,
+                    'r_id' => $bookingData['r_id'],
+                    'guests' => $bookingData['guests'],
+                    'v_id' => $bookingData['discount_code'] ? DB::table('vouchers')->where('v_code', $bookingData['discount_code'])->value('v_id') : null,
+                    'discount_amount' => $bookingData['discount_amount'] ?? 0,
+                    'payment_method' => $bookingData['payment_method'],
+                    'vnp_transaction_id' => $request->vnp_TransactionNo,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+                */
+
+                    // Cập nhật trạng thái phòng (nếu cần)
+                    DB::table('rooms')
+                        ->where('r_id', $bookingData['r_id'])
+                        ->update(['available' => false]);
+
+                    DB::commit();
+
+                    // Lưu lại thông tin booking vào session để hiển thị ở trang success
+                    session(['last_booking' => [
+                        'b_id' => $bookingId,
+                        'r_id' => $bookingData['r_id'],
+                        'guests' => $bookingData['guests'],
+                        'discount_code' => $bookingData['discount_code'],
+                        'discount_amount' => $bookingData['discount_amount'],
+                        'payment_method' => $bookingData['payment_method'],
+                        'vnp_transaction_id' => $request->vnp_TransactionNo ?? null
+                    ]]);
+
+                    // Xóa session booking_data
+                    session()->forget('booking_data');
+
+                    return redirect()->route('booking.success', ['id' => $bookingId])
+                        ->with('success', 'Thanh toán thành công! Đặt phòng của bạn đã được xác nhận.');
+                } else {
+                    // Thanh toán thất bại
+                    session()->forget('booking_data');
+                    return redirect()->route('payment')
+                        ->with('error', 'Thanh toán không thành công. Vui lòng thử lại!');
+                }
+            } else {
+                return redirect()->route('index')->with('error', 'Chữ ký không hợp lệ!');
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('VNPay return error: ' . $e->getMessage());
+            return redirect()->route('index')->with('error', 'Có lỗi xảy ra khi xử lý kết quả thanh toán!');
+        }
+    }
+
+    private function processMoMoPayment($request, $user, $room, $amount)
+    {
+        // Implement MoMo payment logic here
+        return redirect()->back()->with('error', 'Tính năng thanh toán MoMo đang được phát triển!');
+    }
+
+    private function processBankTransfer($request, $user, $room, $amount)
+    {
+        // Implement bank transfer logic here
+        return redirect()->back()->with('error', 'Tính năng chuyển khoản ngân hàng đang được phát triển!');
     }
 }

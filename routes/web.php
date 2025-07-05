@@ -8,14 +8,17 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\PendingRegisterController;
 
-
 // Trang người dùng
+Route::get('/', [rooms_controller::class, 'user_home'])->name('index');
+Route::get('/detail/{id}', [rooms_controller::class, 'room_detail'])->name('rooms_detail');
+Route::get('/payment', [rooms_controller::class, 'payment'])->middleware('auth')->name('payment');
 
-Route::get('/', [rooms_controller::class, 'user_home'])->name('home');
-route::get('/detail/{id}', [rooms_controller::class, 'room_detail'])->name('rooms_detail');
-route::get('/payment', [rooms_controller::class, 'payment'])->name('payment');
-
-
+// VNPay payment routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/process-payment', [rooms_controller::class, 'processPayment'])->name('process.payment');
+    Route::get('/vnpay-return', [rooms_controller::class, 'vnpayReturn'])->name('vnpay.return');
+    Route::get('/booking-success/{id}', [rooms_controller::class, 'bookingSuccess'])->name('booking.success');
+});
 
 // Dashboard người dùng
 Route::get('/dashboard', fn() => view('dashboard'))
@@ -31,7 +34,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Nhóm route dành cho admin
 Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->group(function () {
-
     // Dashboard admin
     Route::get('/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
 
@@ -44,7 +46,7 @@ Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->gro
     Route::get('/add_room', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.add_room_form');
     Route::get('/rooms/edit/{id}', [rooms_controller::class, 'edit_room_form'])->name('admin.rooms.edit');
     Route::put('/rooms/{id}', [rooms_controller::class, 'edit_room_handle'])->name('admin.rooms.update');
-    
+
     // Service Categories
     Route::get('/service_categories', [serviceCategory_cotroller::class, 'index'])->name('service-categories.index');
     Route::get('/service_category', [serviceCategory_cotroller::class, 'create'])->name('service-categories.create');
@@ -75,8 +77,5 @@ use App\Http\Controllers\Auth\SocialController;
 Route::get('/auth/google', [SocialController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [SocialController::class, 'handleGoogleCallback']);
 
-
-
 Route::get('/auth/zalo', [SocialController::class, 'redirectToZalo']);
 Route::get('/auth/zalo/callback', [SocialController::class, 'handleZaloCallback']);
-

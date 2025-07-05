@@ -1,7 +1,7 @@
 <header class="bk-header">
   <div class="bk-header__bar">
     <div class="bk-header__left">
-      <a class="bk-header__logo" href="index.html">Error <span>404</span></a>
+      <a class="bk-header__logo" href="{{ route('index') }}">Error <span>404</span></a>
     </div>
     <nav class="bk-header__nav">
       <ul class="bk-header__nav-list">
@@ -15,15 +15,15 @@
       @guest
       <a href="{{ route('register') }}" class="bk-header__action-btn bk-header__action-signup">Đăng ký</a>
       <a href="{{ route('login') }}" class="bk-header__action-btn bk-header__action-login">Đăng nhập</a>
-    @else
+      @else
       <span>Chào, {{ Auth::user()->name }}</span>
       <span>Chào, {{ Auth::user()->role }}</span>
 
       <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-      @csrf
-      <button type="submit" class="bk-header__action-btn">Đăng xuất</button>
+        @csrf
+        <button type="submit" class="bk-header__action-btn">Đăng xuất</button>
       </form>
-    @endguest
+      @endguest
     </div>
 
     <!-- Mobile menu button -->

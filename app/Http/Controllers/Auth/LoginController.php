@@ -35,12 +35,11 @@ class LoginController extends Controller
             case 'staff':
                 return '/staff/dashboard';
             case 'user':
-                return '/dashboard';
+                return '/';
             default:
                 auth()->logout();
                 return '/login';
         }
-        
     }
 
 
