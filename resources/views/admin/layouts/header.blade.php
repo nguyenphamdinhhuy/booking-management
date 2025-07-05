@@ -14,13 +14,14 @@
             <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
                 alt="Admin Avatar" class="admin-avatar">
             <div class="admin-details">
-                <h4>Nguyễn Văn Admin</h4>
+                <h4>Chào, {{ Auth::user()->name }}</h4>
                 <p>Quản trị viên</p>
             </div>
         </div>
-        <a href="#" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Đăng xuất</span>
-        </a>
+      <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+        @csrf
+        <button class="logout-btn" type="submit">
+        <i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </form>
     </div>
 </header>

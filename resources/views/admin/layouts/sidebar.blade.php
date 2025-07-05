@@ -58,6 +58,12 @@
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
+            <i class="fas fa-newspaper"></i>
+                <span>Quản lý bài viết</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
                 <i class="fas fa-cog"></i>
                 <span>Cài đặt hệ thống</span>
             </a>

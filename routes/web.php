@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\PostController;
 use App\Http\Controllers\admin\service\service_controller;
 use App\Http\Controllers\admin\rooms_controller;
 use App\Http\Controllers\admin\service\serviceCategory_cotroller;
@@ -62,6 +63,9 @@ Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->gro
     Route::delete('/service/{id}', [service_controller::class, 'destroy'])->name('service.destroy');
     Route::get('/service/{id}/edit', [service_controller::class, 'edit'])->name('service.edit');
     Route::put('/service/{id}', [service_controller::class, 'update'])->name('service.update');
+
+    // post
+    Route::get('/post', [PostController::class, 'index'])->name('post.index');
 });
 
 // Trang sau đăng nhập

@@ -22,27 +22,15 @@ class CheckRole
 
         $userRole = Auth::user()->role;
 
-        switch ($userRole) {
-            case "admin":
-                // Admin: cho phép luôn
-                break;
-
-            case "staff":
-                if ($requiredRole != 'staff') {
-                    return redirect('/')->with('error', 'Chỉ nhân viên hoặc admin mới được truy cập.');
-                }
-                break;
-
-            case "user":
-                if ($requiredRole != 'user') {
-                    return redirect('/')->with('error', 'Bạn không có quyền truy cập.');
-                }
-                break;
-
-            default:
-                return redirect('/')->with('error', 'Vai trò không hợp lệ.');
+        // Admin được quyền vào mọi nơi
+        if ($userRole === 'admin') {
+            return $next($request);
         }
 
+        // Các vai trò khác phải đúng
+        if ($userRole !== $requiredRole) {
+            return redirect('/')->with('error', 'Bạn không có quyền truy cập.');
+        }
 
         return $next($request);
     }

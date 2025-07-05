@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -25,22 +26,26 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected function redirectTo()
-    {
-        $role = auth()->user()->role;
 
-        switch ($role) {
+    protected function authenticated(Request $request, $user)
+    {
+        switch ($user->role) {
             case 'admin':
-                return '/admin/dashboard';
+                return redirect('/admin/dashboard');
             case 'staff':
-                return '/staff/dashboard';
+                return redirect('/staff/dashboard');
             case 'user':
+<<<<<<< HEAD
                 return '/';
+=======
+                return redirect('/');
+>>>>>>> db896426bf21a49f717ce395a10b326b2ed09ed0
             default:
                 auth()->logout();
-                return '/login';
+                return redirect('/login');
         }
     }
+
 
 
     /**
