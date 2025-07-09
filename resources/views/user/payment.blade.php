@@ -245,6 +245,12 @@
                     </div>
                 </div>
 
+                @if(request('discount_code') && !$voucher)
+                <div style="color: #e53935; font-size: 15px; margin: 10px 0; font-weight: bold;">
+                    Mã giảm giá không hợp lệ hoặc đã hết hạn!
+                </div>
+                @endif
+
                 <div class="payment-security-info">
                     <div class="security-item">
                         <i class="fas fa-shield-alt"></i>
@@ -265,11 +271,7 @@
                     <strong>Lưu ý:</strong> Bạn sẽ không bị tính phí cho đến khi xác nhận đặt phòng thành công.
                 </div>
 
-                @if(request('discount_code') && !$voucher)
-                <div style="color: #e53935; font-size: 15px; margin-bottom: 10px; font-weight: bold;">
-                    Mã giảm giá không hợp lệ hoặc đã hết hạn!
-                </div>
-                @endif
+
         </div>
     </div>
 </div>
@@ -414,7 +416,7 @@
         margin-bottom: 24px;
         font-size: 16px;
         font-weight: 500;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         display: flex;
         align-items: center;
         gap: 10px;
@@ -424,23 +426,34 @@
         color: #1863b8;
         border: 1.5px solid #b3d8fd;
     }
+
     .custom-alert-success {
         background: #eafaf1;
         color: #1a7f37;
         border-color: #b7e4c7;
     }
+
     .custom-alert-error {
         background: #fff0f0;
         color: #d7263d;
         border-color: #ffd6d6;
     }
+
     .custom-alert i {
         font-size: 20px;
         margin-right: 6px;
     }
+
     @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-20px);}
-        to { opacity: 1; transform: translateY(0);}
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 

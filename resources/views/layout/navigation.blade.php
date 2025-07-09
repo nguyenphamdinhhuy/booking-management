@@ -6,7 +6,7 @@
     <nav class="bk-header__nav">
       <ul class="bk-header__nav-list">
         <li><a href="#" class="bk-header__nav-link">Ưu đãi</a></li>
-        <li><a href="#" class="bk-header__nav-link">Hóa đơn của tôi</a></li>
+        <li><a href="{{ route('booking.history', ['userId' => auth()->id()]) }}" class="bk-header__nav-link">Hóa đơn của tôi</a></li>
         <li><a href="#" class="bk-header__nav-link">Hỗ trợ</a></li>
         <li><a href="#" class="bk-header__nav-link">Chỗ nghỉ của Quý vị</a></li>
       </ul>

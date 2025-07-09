@@ -250,4 +250,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('.filter-select').forEach(select => {
         select.addEventListener('change', () => window.searchRooms());
     });
+
+    
 });

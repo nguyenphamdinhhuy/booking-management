@@ -3,6 +3,7 @@
 use App\Http\Controllers\admin\PostController;
 use App\Http\Controllers\admin\service\service_controller;
 use App\Http\Controllers\admin\rooms_controller;
+use App\Http\Controllers\admin\vouchers_controller;
 use App\Http\Controllers\admin\service\serviceCategory_cotroller;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/booking-history/{userId}', [rooms_controller::class, 'getBookingHistory'])->name('booking.history');
 });
 
 // Nhóm route dành cho admin
@@ -66,6 +68,15 @@ Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->gro
 
     // post
     Route::get('/post', [PostController::class, 'index'])->name('post.index');
+
+
+    // Vouchers
+    Route::get('/vouchers', [vouchers_controller::class, 'management'])->name('vouchers.management');
+    Route::get('/vouchers/create', [vouchers_controller::class, 'create'])->name('vouchers.create');
+    Route::post('/vouchers', [vouchers_controller::class, 'store'])->name('vouchers.store');
+    Route::get('/vouchers/edit/{id}', [vouchers_controller::class, 'edit'])->name('vouchers.edit');
+    Route::put('/vouchers/{id}', [vouchers_controller::class, 'update'])->name('vouchers.update');
+    Route::get('/vouchers/delete/{id}', [vouchers_controller::class, 'delete'])->name('vouchers.delete');
 });
 
 // Trang sau đăng nhập

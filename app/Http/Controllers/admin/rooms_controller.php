@@ -796,9 +796,7 @@ class rooms_controller extends Controller
                 $details = $bookingDetails;
 
                 // Lấy thông tin voucher nếu có
-                if ($bookingDetails->v_id) {
-                    $voucher = DB::table('vouchers')->where('v_id', $bookingDetails->v_id)->first();
-                }
+
             } else {
                 // Fallback: lấy từ session nếu vẫn còn
                 $bookingData = session('booking_data');
@@ -887,27 +885,26 @@ class rooms_controller extends Controller
                         'u_id' => $bookingData['u_id'],
                         'check_in_date' => $bookingData['check_in_date'],
                         'check_out_date' => $bookingData['check_out_date'],
-                        'status' => 1, // Đã thanh toán
+                        'status' => 1,
+                        'payment_status' => 1,
                         'total_price' => $bookingData['total_price'],
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
 
-                    // Thêm chi tiết booking (nếu có bảng booking_details)
-                    // Uncomment phần này nếu bạn có bảng booking_details
-                    /*
-                DB::table('booking_details')->insert([
-                    'b_id' => $bookingId,
-                    'r_id' => $bookingData['r_id'],
-                    'guests' => $bookingData['guests'],
-                    'v_id' => $bookingData['discount_code'] ? DB::table('vouchers')->where('v_code', $bookingData['discount_code'])->value('v_id') : null,
-                    'discount_amount' => $bookingData['discount_amount'] ?? 0,
-                    'payment_method' => $bookingData['payment_method'],
-                    'vnp_transaction_id' => $request->vnp_TransactionNo,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-                */
+
+
+                    // Thêm vào booking_details
+                    DB::table('booking_details')->insert([
+                        'b_id' => $bookingId,
+                        'r_id' => $bookingData['r_id'],
+                        'description' => DB::table('rooms')->where('r_id', $bookingData['r_id'])->value('description'),
+                    ]);
+
+                    // Thêm vào payment
+
+
+
 
                     // Cập nhật trạng thái phòng (nếu cần)
                     DB::table('rooms')
@@ -958,5 +955,84 @@ class rooms_controller extends Controller
     {
         // Implement bank transfer logic here
         return redirect()->back()->with('error', 'Tính năng chuyển khoản ngân hàng đang được phát triển!');
+    }
+
+    public function getBookingHistory($userId)
+    {
+        try {
+            $bookings = DB::table('booking as b')
+                ->join('booking_details as bd', 'b.b_id', '=', 'bd.b_id')
+                ->join('rooms as r', 'bd.r_id', '=', 'r.r_id')
+                ->select(
+                    'b.b_id as id',
+                    'b.check_in_date as checkin_date',
+                    'b.check_out_date as checkout_date',
+                    'b.status',
+                    'b.total_price as price',
+                    'b.created_at',
+                    'b.payment_status',
+                    'r.name as room_type',
+                    'r.price_per_night',
+                    'r.max_guests as guests',
+                    'r.number_beds',
+                    'r.images as images',
+                    'bd.description as booking_description',
+                    // Thêm các trường giả định cho hotel (có thể lấy từ bảng hotels nếu có)
+                    DB::raw("'Hotel Name' as hotel_name"),
+                    DB::raw("'Hotel Address' as hotel_address"),
+                    DB::raw("'4.5' as rating"),
+                    DB::raw("0 as refund_price")
+                )
+                ->where('b.u_id', $userId)
+                ->orderBy('b.created_at', 'desc')
+                ->get();
+
+            // Transform data để phù hợp với view
+            $transformedBookings = collect();
+
+            foreach ($bookings as $booking) {
+                // Chuyển đổi status từ tinyint sang string
+                $statusMap = [
+                    0 => 'cancelled',
+                    1 => 'completed',
+                    2 => 'confirmed'
+                ];
+
+                $booking->status = $statusMap[$booking->status] ?? 'confirmed';
+
+                // Xử lý image_url từ trường images
+                if ($booking->images) {
+                    $images = explode(',', $booking->images);
+                    $booking->image_url = asset('storage/' . trim($images[0]));
+                }
+
+                // Thêm canceled_at nếu status là cancelled
+                if ($booking->status === 'cancelled') {
+                    $booking->canceled_at = $booking->created_at;
+                }
+
+                $transformedBookings->push($booking);
+            }
+
+            return view('user.booking_bill', ['bookings' => $transformedBookings]);
+        } catch (Exception $e) {
+            return back()->with('error', 'Không thể tải lịch sử đặt phòng: ' . $e->getMessage());
+        }
+    }
+
+    // Lấy thống kê booking cho user
+    public function getBookingStats($userId)
+    {
+        $stats = DB::table('booking')
+            ->select(
+                DB::raw('COUNT(*) as total_bookings'),
+                DB::raw('SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as completed_bookings'),
+                DB::raw('SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as cancelled_bookings'),
+                DB::raw('SUM(total_price) as total_spent')
+            )
+            ->where('u_id', $userId)
+            ->first();
+
+        return $stats;
     }
 }

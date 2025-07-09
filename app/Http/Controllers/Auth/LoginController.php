@@ -35,11 +35,7 @@ class LoginController extends Controller
             case 'staff':
                 return redirect('/staff/dashboard');
             case 'user':
-<<<<<<< HEAD
-                return '/';
-=======
-                return redirect('/');
->>>>>>> db896426bf21a49f717ce395a10b326b2ed09ed0
+
             default:
                 auth()->logout();
                 return redirect('/login');

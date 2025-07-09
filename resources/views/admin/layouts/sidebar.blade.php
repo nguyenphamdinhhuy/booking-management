@@ -39,9 +39,9 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-dollar-sign"></i>
-                <span>Quản lý thanh toán</span>
+            <a href="{{ route('vouchers.management') }}" class="nav-link">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Quản lý mã giảm giá</span>
             </a>
         </li>
         <li class="nav-item">
@@ -58,7 +58,7 @@
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
-            <i class="fas fa-newspaper"></i>
+                <i class="fas fa-newspaper"></i>
                 <span>Quản lý bài viết</span>
             </a>
         </li>

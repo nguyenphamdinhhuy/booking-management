@@ -1,6 +1,8 @@
 @extends('layout.app')
 
 @section('content')
+
+
 <section class="hero-slider-section">
   <div class="hero-swiper swiper">
     <div class="swiper-wrapper">
@@ -33,6 +35,30 @@
     <div class="swiper-button-next"></div>
   </div>
 </section>
+{{-- Hiển thị thông báo --}}
+@if(session('success'))
+<div class="custom-alert custom-alert-success" id="alert-success">
+  <i class="fas fa-check-circle"></i> {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="custom-alert custom-alert-error" id="alert-error">
+  <i class="fas fa-times-circle"></i> {{ session('error') }}
+</div>
+@endif
+
+{{-- Hiển thị lỗi validation --}}
+@if($errors->any())
+<div class="custom-alert custom-alert-error" id="alert-validate">
+  <i class="fas fa-exclamation-triangle"></i>
+  <ul style="margin: 0; padding-left: 20px;">
+    @foreach($errors->all() as $error)
+    <li>{{ $error }}</li>
+    @endforeach
+  </ul>
+</div>
+@endif
 <form class="b-search-bar">
   <div class="b-search-field b-search-loc">
     <span class="b-search-icon">
