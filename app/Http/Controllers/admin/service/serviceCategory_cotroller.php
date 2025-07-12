@@ -33,12 +33,20 @@ class serviceCategory_cotroller extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
-
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/service'), $fileName);
+            $imagePath = 'uploads/service/' . $fileName;
+        }
         // Lưu vào DB
         ServiceCategory::create([
             'name' => $request->name,
             'description' => $request->description,
+            'image' => $imagePath,
         ]);
 
         return redirect()->route('service-categories.index')->with('success', 'Thêm danh mục thành công!');
@@ -70,12 +78,21 @@ class serviceCategory_cotroller extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:ipg,jpeg,png|max:2048',
         ]);
 
         $category = ServiceCategory::findOrFail($id);
+        $imagePath = $category->image;
+        if($request->hasFile('image')){
+            $file = $request->file('image');
+            $fileName = time() . '_' .$file->getClientOriginalName();
+            $file->move(public_path('upload/services'),$fileName);
+            $imagePath = 'upload/services/' .$fileName;
+        }
         $category->update([
             'name' => $request->name,
             'description' => $request->description,
+            'image' => $imagePath,
         ]);
 
         return redirect()->route('service-categories.index')->with('success', 'Cập nhật thành công!');

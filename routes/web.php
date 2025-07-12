@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\service\service_controller;
 use App\Http\Controllers\admin\rooms_controller;
 use App\Http\Controllers\admin\vouchers_controller;
 use App\Http\Controllers\admin\service\serviceCategory_cotroller;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,12 @@ use App\Http\Controllers\Auth\PendingRegisterController;
 Route::get('/', [rooms_controller::class, 'user_home'])->name('index');
 Route::get('/detail/{id}', [rooms_controller::class, 'room_detail'])->name('rooms_detail');
 Route::get('/payment', [rooms_controller::class, 'payment'])->middleware('auth')->name('payment');
+// trang dich vu nguoi dung
+
+Route::get('/service/{id}', [service_controller::class, 'serviceDetails'])->name('Service.byCategory');
+
+
+
 
 // VNPay payment routes
 Route::middleware(['auth', 'verified'])->group(function () {

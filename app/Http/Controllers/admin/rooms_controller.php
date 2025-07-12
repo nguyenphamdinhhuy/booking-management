@@ -9,6 +9,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\ServiceCategory;
+
+
 
 class rooms_controller extends Controller
 {
@@ -482,9 +485,15 @@ class rooms_controller extends Controller
                     'count' => $rooms->count()
                 ]);
             }
+            $serviceCategories = ServiceCategory::with('services')->get();
+
+            // Lấy danh sách dịch vụ (ví dụ 6 dịch vụ có sẵn)
+            $services = ServiceCategory::all();
+
 
             // Trả về view
-            return view('user.home', compact('rooms', 'stats'));
+            return view('user.home', compact('rooms', 'stats', 'services', 'serviceCategories'));
+
         } catch (\Exception $e) {
             // Log lỗi
             \Log::error('Error loading rooms for user home: ' . $e->getMessage());
@@ -615,7 +624,8 @@ class rooms_controller extends Controller
         // Tính số đêm
         if ($room && $checkin && $checkout) {
             $nights = (strtotime($checkout) - strtotime($checkin)) / 86400;
-            if ($nights < 1) $nights = 1;
+            if ($nights < 1)
+                $nights = 1;
             $total_price = $nights * $room->price_per_night;
 
             // Kiểm tra mã giảm giá
@@ -669,7 +679,8 @@ class rooms_controller extends Controller
 
             // Tính toán giá tiền
             $nights = (strtotime($request->checkout) - strtotime($request->checkin)) / 86400;
-            if ($nights < 1) $nights = 1;
+            if ($nights < 1)
+                $nights = 1;
 
             $totalPrice = $nights * $room->price_per_night;
             $discountAmount = $request->discount_amount ?? 0;
@@ -819,7 +830,8 @@ class rooms_controller extends Controller
             $nights = 1;
             if ($booking->check_in_date && $booking->check_out_date) {
                 $nights = (strtotime($booking->check_out_date) - strtotime($booking->check_in_date)) / 86400;
-                if ($nights < 1) $nights = 1;
+                if ($nights < 1)
+                    $nights = 1;
             }
 
             // Format ngày tháng
@@ -914,15 +926,17 @@ class rooms_controller extends Controller
                     DB::commit();
 
                     // Lưu lại thông tin booking vào session để hiển thị ở trang success
-                    session(['last_booking' => [
-                        'b_id' => $bookingId,
-                        'r_id' => $bookingData['r_id'],
-                        'guests' => $bookingData['guests'],
-                        'discount_code' => $bookingData['discount_code'],
-                        'discount_amount' => $bookingData['discount_amount'],
-                        'payment_method' => $bookingData['payment_method'],
-                        'vnp_transaction_id' => $request->vnp_TransactionNo ?? null
-                    ]]);
+                    session([
+                        'last_booking' => [
+                            'b_id' => $bookingId,
+                            'r_id' => $bookingData['r_id'],
+                            'guests' => $bookingData['guests'],
+                            'discount_code' => $bookingData['discount_code'],
+                            'discount_amount' => $bookingData['discount_amount'],
+                            'payment_method' => $bookingData['payment_method'],
+                            'vnp_transaction_id' => $request->vnp_TransactionNo ?? null
+                        ]
+                    ]);
 
                     // Xóa session booking_data
                     session()->forget('booking_data');

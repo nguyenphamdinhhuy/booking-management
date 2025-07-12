@@ -133,4 +133,20 @@ class service_controller extends Controller
         $service->delete();
         return redirect()->route('services.index')->with('success', 'Xóa thành công!');
     }
+
+
+
+    // nguoi dung
+    public function serviceDetails($id)
+    {
+        $services = Service::where('category_id', $id)->get();
+        $categories = ServiceCategory::all();
+        $currentCategoryId = $id;
+        return view('user.Service.serviceDetails', compact('services', 'categories', 'currentCategoryId'));
+    }
+
+
+
+
+
 }

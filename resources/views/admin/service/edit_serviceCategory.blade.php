@@ -33,6 +33,20 @@
                         placeholder="Mô tả chi tiết về dịch vụ, tiện nghi..."
                         rows="5">{{ old('description', $category->description) }}</textarea>
                 </div>
+
+                <!-- hinh anh -->
+                <div class="form-group full-width">
+                    <label for="image" class="form-label">
+                        <i class="fas fa-image"></i> Hình ảnh hiện tại
+                    </label>
+                    @if($category->image)
+                        <div><img src="{{ asset($category->image) }}" width="120" height="80"></div>
+                    @else
+                        <div>Không có ảnh</div>
+                    @endif
+                    <input type="file" name="image" id="image" class="form-input mt-2">
+                </div>
+
             </div>
 
             <!-- Form Actions -->
