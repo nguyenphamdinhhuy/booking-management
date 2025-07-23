@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
+use DateTime;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -493,7 +494,6 @@ class rooms_controller extends Controller
 
             // Trả về view
             return view('user.home', compact('rooms', 'stats', 'services', 'serviceCategories'));
-
         } catch (\Exception $e) {
             // Log lỗi
             \Log::error('Error loading rooms for user home: ' . $e->getMessage());
@@ -897,7 +897,7 @@ class rooms_controller extends Controller
                         'u_id' => $bookingData['u_id'],
                         'check_in_date' => $bookingData['check_in_date'],
                         'check_out_date' => $bookingData['check_out_date'],
-                        'status' => 1,
+                        'status' => 0,
                         'payment_status' => 1,
                         'total_price' => $bookingData['total_price'],
                         'created_at' => now(),
@@ -918,10 +918,7 @@ class rooms_controller extends Controller
 
 
 
-                    // Cập nhật trạng thái phòng (nếu cần)
-                    DB::table('rooms')
-                        ->where('r_id', $bookingData['r_id'])
-                        ->update(['available' => false]);
+
 
                     DB::commit();
 
@@ -1048,5 +1045,313 @@ class rooms_controller extends Controller
             ->first();
 
         return $stats;
+    }
+
+    public function bookingDetail($id)
+    {
+        $booking = DB::table('booking')
+            ->join('booking_details', 'booking.b_id', '=', 'booking_details.b_id')
+            ->join('rooms', 'booking_details.r_id', '=', 'rooms.r_id')
+            ->select(
+                'booking.*',
+                'booking_details.description as booking_description',
+                'rooms.name as room_name',
+                'rooms.price_per_night',
+                'rooms.max_guests',
+                'rooms.number_beds',
+                'rooms.images',
+                'rooms.description as room_description'
+            )
+            ->where('booking.b_id', $id)
+            ->first();
+
+        if (!$booking) {
+            return redirect()->route('booking.history', ['userId' => auth()->id()])
+                ->with('error', 'Không tìm thấy đơn đặt phòng');
+        }
+
+        // Kiểm tra quyền xem (chỉ user tạo đơn mới được xem)
+        if ($booking->u_id != auth()->id()) {
+            return redirect()->route('booking.history', ['userId' => auth()->id()])
+                ->with('error', 'Bạn không có quyền xem đơn đặt phòng này');
+        }
+
+        return view('user.booking_detail', compact('booking'));
+    }
+
+    /**
+     * User xác nhận trả phòng
+     */
+    public function confirmCheckout($id)
+    {
+        $booking = DB::table('booking')->where('b_id', $id)->first();
+
+        if (!$booking || $booking->u_id != auth()->id()) {
+            return redirect()->back()->with('error', 'Không tìm thấy đơn đặt phòng');
+        }
+
+        if ($booking->status != 1) { // 1 = đã xác nhận từ admin
+            return redirect()->back()->with('error', 'Đơn đặt phòng chưa được xác nhận');
+        }
+
+        // Cập nhật status = 2 (đã trả phòng)
+        DB::table('booking')
+            ->where('b_id', $id)
+            ->update([
+                'status' => 2,
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('booking.detail', $id)
+            ->with('success', 'Đã xác nhận trả phòng thành công');
+    }
+
+    /**
+     * Admin quản lý đơn đặt phòng
+     */
+    public function bookingManagement()
+    {
+        try {
+            $bookings = DB::table('booking as b')
+                ->join('users as u', 'b.u_id', '=', 'u.id')
+                ->join('booking_details as bd', 'b.b_id', '=', 'bd.b_id')
+                ->join('rooms as r', 'bd.r_id', '=', 'r.r_id')
+                ->select(
+                    'b.b_id',
+                    'b.u_id',
+                    'b.check_in_date',
+                    'b.check_out_date',
+                    'b.status',
+                    'b.total_price',
+                    'b.created_at',
+                    'b.updated_at',
+                    'b.payment_status',
+                    'u.name as user_name',
+                    'u.email as user_email',
+                    'r.r_id',
+                    'r.name as room_name',
+                    'r.images as room_images',
+                    'r.price_per_night',
+                    'r.max_guests',
+                    'r.number_beds',
+                    'bd.description as booking_description'
+                )
+                ->orderBy('b.created_at', 'desc')
+                ->get();
+
+            // Transform data để hiển thị
+            $transformedBookings = collect();
+
+            foreach ($bookings as $booking) {
+                // Chuyển đổi status từ tinyint sang string để hiển thị
+                $statusMap = [
+                    0 => 'pending',   // Chờ xác nhận
+                    1 => 'confirmed', // Đã xác nhận, chờ trả phòng
+                    2 => 'completed', // Đã hoàn tất
+                    3 => 'cancelled'  // Đã hủy (nếu có)
+                ];
+
+                $booking->status_text = $statusMap[$booking->status] ?? 'unknown';
+
+                // Xử lý hình ảnh phòng
+                if ($booking->room_images) {
+                    $images = explode(',', $booking->room_images);
+                    $booking->room_image_url = asset('storage/' . trim($images[0]));
+                } else {
+                    $booking->room_image_url = asset('images/no-image.jpg');
+                }
+
+                // Format giá tiền
+                $booking->formatted_total_price = number_format($booking->total_price, 0, ',', '.') . ' VND';
+                $booking->formatted_price_per_night = number_format($booking->price_per_night, 0, ',', '.') . ' VND';
+
+                // Format ngày tháng
+                $booking->formatted_check_in = date('d/m/Y', strtotime($booking->check_in_date));
+                $booking->formatted_check_out = date('d/m/Y', strtotime($booking->check_out_date));
+                $booking->formatted_created_at = date('d/m/Y H:i', strtotime($booking->created_at));
+
+                // Tính số đêm
+                $checkin = new DateTime($booking->check_in_date);
+                $checkout = new DateTime($booking->check_out_date);
+                $booking->nights = $checkin->diff($checkout)->days;
+
+                $transformedBookings->push($booking);
+            }
+
+            return view('admin.bookings.management', ['bookings' => $transformedBookings]);
+        } catch (Exception $e) {
+            return back()->with('error', 'Không thể tải danh sách đơn đặt phòng: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Xem chi tiết đơn đặt phòng
+     */
+    public function viewBooking($id)
+    {
+        try {
+            $booking = DB::table('booking as b')
+                ->join('users as u', 'b.u_id', '=', 'u.id')
+                ->join('booking_details as bd', 'b.b_id', '=', 'bd.b_id')
+                ->join('rooms as r', 'bd.r_id', '=', 'r.r_id')
+                ->select(
+                    'b.*',
+                    'u.name as user_name',
+                    'u.email as user_email',
+                    'r.r_id',
+                    'r.name as room_name',
+                    'r.images as room_images',
+                    'r.price_per_night',
+                    'r.max_guests',
+                    'r.number_beds',
+                    'r.description as room_description',
+                    'bd.description as booking_description'
+                )
+                ->where('b.b_id', $id)
+                ->first();
+
+            if (!$booking) {
+                return redirect()->route('admin.bookings.management')
+                    ->with('error', 'Không tìm thấy đơn đặt phòng');
+            }
+
+            // Transform data
+            $statusMap = [
+                0 => 'pending',
+                1 => 'confirmed',
+                2 => 'completed',
+                3 => 'cancelled'
+            ];
+
+            $booking->status_text = $statusMap[$booking->status] ?? 'unknown';
+
+            // Xử lý hình ảnh
+            if ($booking->room_images) {
+                $images = explode(',', $booking->room_images);
+                $booking->room_image_urls = array_map(function ($img) {
+                    return asset('storage/' . trim($img));
+                }, $images);
+            }
+
+            // Format dữ liệu
+            $booking->formatted_total_price = number_format($booking->total_price, 0, ',', '.') . ' VND';
+            $booking->formatted_price_per_night = number_format($booking->price_per_night, 0, ',', '.') . ' VND';
+            $booking->formatted_check_in = date('d/m/Y', strtotime($booking->check_in_date));
+            $booking->formatted_check_out = date('d/m/Y', strtotime($booking->check_out_date));
+            $booking->formatted_created_at = date('d/m/Y H:i', strtotime($booking->created_at));
+
+            // Tính số đêm
+            $checkin = new DateTime($booking->check_in_date);
+            $checkout = new DateTime($booking->check_out_date);
+            $booking->nights = $checkin->diff($checkout)->days;
+
+            return view('admin.bookings.view', compact('booking'));
+        } catch (Exception $e) {
+            return back()->with('error', 'Không thể tải chi tiết đơn đặt phòng: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Admin xác nhận đơn đặt phòng (từ status 0 -> 1)
+     */
+    public function confirmBooking($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Lấy thông tin booking
+            $booking = DB::table('booking as b')
+                ->join('booking_details as bd', 'b.b_id', '=', 'bd.b_id')
+                ->select('b.*', 'bd.r_id')
+                ->where('b.b_id', $id)
+                ->first();
+
+            if (!$booking) {
+                return redirect()->back()->with('error', 'Không tìm thấy đơn đặt phòng');
+            }
+
+            // Kiểm tra trạng thái đơn đặt phòng
+            if ($booking->status != 0) {
+                return redirect()->back()->with('error', 'Đơn đặt phòng không ở trạng thái chờ xác nhận');
+            }
+
+            // Kiểm tra phòng có còn trống không
+            $room = DB::table('rooms')->where('r_id', $booking->r_id)->first();
+            if (!$room || $room->available != 1) {
+                return redirect()->back()->with('error', 'Phòng không còn trống hoặc không tồn tại');
+            }
+
+            // Cập nhật trạng thái booking thành đã xác nhận (1)
+            DB::table('booking')
+                ->where('b_id', $id)
+                ->update([
+                    'status' => 1,
+                    'updated_at' => now()
+                ]);
+
+            // Cập nhật trạng thái phòng thành đã được đặt (available = 0)
+            DB::table('rooms')
+                ->where('r_id', $booking->r_id)
+                ->update([
+                    'available' => 0,
+                    'updated_at' => now()
+                ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Đã xác nhận đơn đặt phòng thành công. Phòng đã được đánh dấu là đã được đặt.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xác nhận đơn đặt phòng: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Admin xác nhận trả phòng thành công (từ status 1 -> 2)
+     */
+    public function confirmCheckoutSuccess($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Lấy thông tin booking
+            $booking = DB::table('booking as b')
+                ->join('booking_details as bd', 'b.b_id', '=', 'bd.b_id')
+                ->select('b.*', 'bd.r_id')
+                ->where('b.b_id', $id)
+                ->first();
+
+            if (!$booking) {
+                return redirect()->back()->with('error', 'Không tìm thấy đơn đặt phòng');
+            }
+
+            // Kiểm tra trạng thái đơn đặt phòng
+            if ($booking->status != 1) {
+                return redirect()->back()->with('error', 'Đơn đặt phòng không ở trạng thái chờ trả phòng');
+            }
+
+            // Cập nhật trạng thái booking thành hoàn tất (2)
+            DB::table('booking')
+                ->where('b_id', $id)
+                ->update([
+                    'status' => 2,
+                    'updated_at' => now()
+                ]);
+
+            // Cập nhật trạng thái phòng thành còn trống (available = 1)
+            DB::table('rooms')
+                ->where('r_id', $booking->r_id)
+                ->update([
+                    'available' => 1,
+                    'updated_at' => now()
+                ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Đã xác nhận trả phòng thành công. Phòng đã được cập nhật trạng thái còn trống.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xác nhận trả phòng: ' . $e->getMessage());
+        }
     }
 }

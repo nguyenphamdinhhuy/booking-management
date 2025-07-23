@@ -4,44 +4,45 @@
 @section('title', 'Đặt phòng thành công')
 
 @section('content')
-<div class="payment-header">
-    <div class="header-top">
-        <div class="logo-section">
-            <div class="logo-icon">
-                <i class="fas fa-credit-card"></i>
-            </div>
-            <div class="logo-text">BookingPay</div>
-        </div>
-        <div class="security-badge">
-            <i class="fas fa-shield-alt"></i>
-            <span>Bảo mật SSL</span>
-        </div>
-    </div>
 
-    <div class="progress-bar">
-        <div class="progress-fill" style="width: 100%"></div>
-    </div>
-
-    <div class="step-indicator">
-        <div class="step completed">
-            <i class="fas fa-check-circle"></i>
-            <span>Chọn phòng</span>
-        </div>
-        <div class="step completed">
-            <i class="fas fa-check-circle"></i>
-            <span>Thông tin</span>
-        </div>
-        <div class="step active">
-            <i class="fas fa-credit-card"></i>
-            <span>Thanh toán</span>
-        </div>
-        <div class="step">
-            <i class="fas fa-check-circle"></i>
-            <span>Hoàn tất</span>
-        </div>
-    </div>
-</div>
 <div class="booking-wrapper">
+    <div class="payment-header">
+        <div class="header-top">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="logo-text">BookingPay</div>
+            </div>
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Bảo mật SSL</span>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step completed">
+                <i class="fas fa-check-circle"></i>
+                <span>Chọn phòng</span>
+            </div>
+            <div class="step completed">
+                <i class="fas fa-check-circle"></i>
+                <span>Thông tin</span>
+            </div>
+            <div class="step active">
+                <i class="fas fa-credit-card"></i>
+                <span>Thanh toán</span>
+            </div>
+            <div class="step">
+                <i class="fas fa-check-circle"></i>
+                <span>Hoàn tất</span>
+            </div>
+        </div>
+    </div>
     <div class="booking-container">
         <div class="booking-box">
             <div class="booking-header">
@@ -140,7 +141,8 @@
                     <a href="{{ route('index') }}" class="booking-btn booking-btn-primary">
                         <i class="fas fa-home"></i> Về trang chủ
                     </a>
-                    <a href="{{ route('booking.history', ['userId' => $user->id]) }}" class="booking-btn booking-btn-secondary">
+                    <a href="{{ route('booking.history', ['userId' => Auth::id()]) }}"
+                        class="booking-btn booking-btn-secondary">
                         <i class="fas fa-history"></i> Lịch sử đặt phòng
                     </a>
                 </div>
