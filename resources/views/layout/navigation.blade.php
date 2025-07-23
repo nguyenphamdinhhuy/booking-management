@@ -6,7 +6,11 @@
     <nav class="bk-header__nav">
       <ul class="bk-header__nav-list">
         <li><a href="#" class="bk-header__nav-link">Ưu đãi</a></li>
-        <li><a href="{{ route('booking.history', ['userId' => auth()->id()]) }}" class="bk-header__nav-link">Hóa đơn của tôi</a></li>
+        @auth
+      <li><a href="{{ route('booking.history', ['userId' => auth()->id()]) }}" class="bk-header__nav-link">Hóa đơn của
+        tôi</a>
+      </li>
+    @endauth
         <li><a href="#" class="bk-header__nav-link">Hỗ trợ</a></li>
         <li><a href="#" class="bk-header__nav-link">Chỗ nghỉ của Quý vị</a></li>
       </ul>
@@ -15,13 +19,13 @@
       @guest
       <a href="{{ route('register') }}" class="bk-header__action-btn bk-header__action-signup">Đăng ký</a>
       <a href="{{ route('login') }}" class="bk-header__action-btn bk-header__action-login">Đăng nhập</a>
-      @else
+    @else
       <span>Chào, {{ Auth::user()->name }}</span>
       <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-        @csrf
-        <button type="submit" class="bk-header__action-btn">Đăng xuất</button>
+      @csrf
+      <button type="submit" class="bk-header__action-btn">Đăng xuất</button>
       </form>
-      @endguest
+    @endguest
     </div>
 
     <!-- Mobile menu button -->
