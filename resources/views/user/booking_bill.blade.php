@@ -62,7 +62,7 @@
                     </div>
                     <div class="history-detail-item">
                         <span class="history-detail-label">Số đêm</span>
-                        <span class="history-detail-value">{{ \Carbon\Carbon::parse($booking->checkout_date)->diffInDays($booking->checkin_date) }} đêm</span>
+                        <span class="history-detail-value">{{ \Carbon\Carbon::parse($booking->checkin_date)->diffInDays($booking->checkout_date) }} đêm</span>
                     </div>
 
                     <div class="history-detail-item">
@@ -96,7 +96,7 @@
                 </div>
 
                 <div class="history-actions">
-                    <a href="" class="history-btn history-btn-primary">Xem chi tiết</a>
+                    <a href="{{ route('booking.detail', ['id' => $booking->id]) }}" class="history-btn history-btn-primary">Xem chi tiết</a>
                     @if($booking->status !== 'cancelled')
                     <a href="" class="history-btn history-btn-secondary">Tải hóa đơn</a>
                     @endif

@@ -4,6 +4,11 @@
 @section('title', 'Đặt phòng thành công')
 
 @section('content')
+<<<<<<< HEAD
+=======
+
+<div class="booking-wrapper">
+>>>>>>> 6b796dc (Quản lí đặt phòng, xử đặt phòng, lịch sử đặt phòng)
     <div class="payment-header">
         <div class="header-top">
             <div class="logo-section">
@@ -38,6 +43,23 @@
             <div class="step">
                 <i class="fas fa-check-circle"></i>
                 <span>Hoàn tất</span>
+<<<<<<< HEAD
+=======
+            </div>
+        </div>
+    </div>
+    <div class="booking-container">
+        <div class="booking-box">
+            <div class="booking-header">
+                <div class="booking-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="booking-title">Đặt phòng thành công!</h2>
+                <p class="booking-message">
+                    Cảm ơn bạn đã đặt phòng tại hệ thống của chúng tôi.<br>
+                    Thông tin đặt phòng đã được gửi về email của bạn.
+                </p>
+>>>>>>> 6b796dc (Quản lí đặt phòng, xử đặt phòng, lịch sử đặt phòng)
             </div>
         </div>
     </div>
@@ -86,6 +108,7 @@
                         </div>
                     </div>
 
+<<<<<<< HEAD
                     <div class="booking-dates">
                         <div class="booking-date-box">
                             <i class="fas fa-calendar-check booking-date-icon"></i>
@@ -102,6 +125,17 @@
                             </div>
                         </div>
                     </div>
+=======
+                <div class="booking-actions">
+                    <a href="{{ route('index') }}" class="booking-btn booking-btn-primary">
+                        <i class="fas fa-home"></i> Về trang chủ
+                    </a>
+                    <a href="{{ route('booking.history', ['userId' => Auth::id()]) }}"
+                        class="booking-btn booking-btn-secondary">
+                        <i class="fas fa-history"></i> Lịch sử đặt phòng
+                    </a>
+                </div>
+>>>>>>> 6b796dc (Quản lí đặt phòng, xử đặt phòng, lịch sử đặt phòng)
 
                     <div class="booking-summary">
                         <h4 class="booking-info-title">Tổng kết thanh toán</h4>

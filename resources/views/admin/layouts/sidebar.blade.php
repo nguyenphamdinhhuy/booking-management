@@ -8,7 +8,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('admin.bookings.management') }}" class="nav-link">
                 <i class="fas fa-calendar-check"></i>
                 <span>Quản lý đặt phòng</span>
             </a>
