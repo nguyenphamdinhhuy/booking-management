@@ -36,9 +36,7 @@ class LoginController extends Controller
                 return redirect('/staff/dashboard');
             case 'user':
 
-            default:
-                auth()->logout();
-                return redirect('/login');
+                return redirect('http://127.0.0.1:8000/');
         }
     }
 

@@ -86,6 +86,43 @@
                     <textarea name="description" id="description" class="form-textarea"
                         rows="5">{{ old('description', $service->description) }}</textarea>
                 </div>
+
+                <!-- Số lượng tối đa -->
+                <div class="form-group">
+                    <label for="max_quantity" class="form-label">
+                        <i class="fas fa-sort-numeric-up-alt"></i> Số lượng tối đa
+                    </label>
+                    <input type="number" name="max_quantity" id="max_quantity" class="form-input"
+                        value="{{ old('max_quantity', $service->max_quantity) }}" min="1">
+                </div>
+
+                <!-- Thời gian cung cấp dịch vụ -->
+                <div class="form-group">
+                    <label for="service_time" class="form-label">
+                        <i class="fas fa-clock"></i> Thời gian cung cấp dịch vụ
+                    </label>
+                    <input type="text" name="service_time" id="service_time" class="form-input"
+                        value="{{ old('service_time', $service->service_time) }}" placeholder="VD: 8h00 - 17h00">
+                </div>
+
+                <!-- Địa điểm -->
+                <div class="form-group">
+                    <label for="location" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i> Địa điểm
+                    </label>
+                    <input type="text" name="location" id="location" class="form-input"
+                        value="{{ old('location', $service->location) }}" placeholder="VD: Sảnh A, tầng 1">
+                </div>
+
+                <!-- Ghi chú -->
+                <div class="form-group full-width">
+                    <label for="note" class="form-label">
+                        <i class="fas fa-sticky-note"></i> Ghi chú thêm
+                    </label>
+                    <textarea name="note" id="note" class="form-textarea"
+                        rows="3">{{ old('note', $service->note) }}</textarea>
+                </div>
+
             </div>
 
             <!-- Hành động -->

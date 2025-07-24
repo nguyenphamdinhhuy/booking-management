@@ -43,6 +43,7 @@
             </div>
         </div>
     </div>
+
     <div class="booking-container">
         <div class="booking-box">
             <div class="booking-header">
@@ -141,8 +142,7 @@
                     <a href="{{ route('index') }}" class="booking-btn booking-btn-primary">
                         <i class="fas fa-home"></i> Về trang chủ
                     </a>
-                    <a href="{{ route('booking.history', ['userId' => Auth::id()]) }}"
-                        class="booking-btn booking-btn-secondary">
+                    <a href="{{ route('booking.history', ['userId' => Auth::id()]) }}" class="booking-btn booking-btn-secondary">
                         <i class="fas fa-history"></i> Lịch sử đặt phòng
                     </a>
                 </div>

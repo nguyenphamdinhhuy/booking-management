@@ -45,26 +45,37 @@ class service_controller extends Controller
             'price' => 'required|numeric',
             'unit' => 'required|string|max:50',
             'category_id' => 'required|exists:service_categories,id',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'is_available' => 'required|boolean',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'max_quantity' => 'nullable|integer',
+            'service_time' => 'nullable|string|max:100',
+            'location' => 'nullable|string|max:255',
+            'note' => 'nullable|string',
+        ]);
+        $data = $request->only([
+            'name',
+            'price',
+            'unit',
+            'category_id',
+            'is_available',
+            'description',
+            'max_quantity',
+            'service_time',
+            'location',
+            'note',
         ]);
         $imagePath = null;
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('uploads/services'), $fileName);
-            $imagePath = 'uploads/services/' . $fileName;
+            $data['image'] = 'uploads/services/' . $fileName;
         }
 
-        Service::create([
-            'name' => $request->name,
-            'price' => $request->price,
-            'unit' => $request->unit,
-            'category_id' => $request->category_id,
-            'is_available' => $request->has('is_available') ? 1 : 0,
-            'description' => $request->description,
-            'image' => $imagePath,
-        ]);
+
+
+        Service::create($data);
 
         return redirect()->route('services.index')->with('success', 'Thêm dịch vụ thành công!');
     }
@@ -97,8 +108,25 @@ class service_controller extends Controller
             'price' => 'required|numeric',
             'unit' => 'required|string|max:50',
             'category_id' => 'required|exists:service_categories,id',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'is_available' => 'required|boolean',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'max_quantity' => 'nullable|integer',
+            'service_time' => 'nullable|string|max:100',
+            'location' => 'nullable|string|max:255',
+            'note' => 'nullable|string',
+        ]);
+        $data = $request->only([
+            'name',
+            'price',
+            'unit',
+            'category_id',
+            'is_available',
+            'description',
+            'max_quantity',
+            'service_time',
+            'location',
+            'note',
         ]);
 
         $service = Service::findOrFail($id);
@@ -108,18 +136,10 @@ class service_controller extends Controller
             $file = $request->file('image');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('uploads/services'), $fileName);
-            $imagePath = 'uploads/services/' . $fileName;
+            $data['image'] = 'uploads/services/' . $fileName;
         }
 
-        $service->update([
-            'name' => $request->name,
-            'price' => $request->price,
-            'unit' => $request->unit,
-            'category_id' => $request->category_id,
-            'is_available' => $request->has('is_available') ? 1 : 0,
-            'description' => $request->description,
-            'image' => $imagePath,
-        ]);
+        $service->update($data);
 
         return redirect()->route('services.index')->with('success', 'Cập nhật dịch vụ thành công!');
     }
@@ -139,7 +159,7 @@ class service_controller extends Controller
     // nguoi dung
     public function serviceDetails($id)
     {
-        $services = Service::where('category_id', $id)->get();
+        $services = Service::where('category_id', $id)->where('is_available', 1)->get();
         $categories = ServiceCategory::all();
         $currentCategoryId = $id;
         return view('user.Service.serviceDetails', compact('services', 'categories', 'currentCategoryId'));
