@@ -46,7 +46,7 @@ class LoginController extends Controller
             case 'admin':
                 return redirect('/admin/dashboard');
             case 'staff':
-                return redirect('/staff/dashboard');
+                return redirect('/');
             case 'user':
 
             default:

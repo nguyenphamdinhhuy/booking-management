@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Tài khoản bị khóa'); ?>
 
 <?php $__env->startSection('content'); ?>

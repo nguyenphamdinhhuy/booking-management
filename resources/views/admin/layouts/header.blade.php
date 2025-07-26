@@ -12,8 +12,8 @@
     <div class="header-right">
         <div class="admin-dropdown">
             <div class="admin-trigger" onclick="toggleAdminDropdown()">
-            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face' }}"
-     alt="Admin Avatar" class="admin-avatar">
+                <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face' }}"
+                    alt="Admin Avatar" class="admin-avatar">
 
                 <div class="admin-details">
                     <h4>{{ Auth::user()->name }}</h4>
@@ -41,14 +41,7 @@
                             <i class="fas fa-lock"></i>
                             <span>Đổi mật khẩu</span>
                         </a></li>
-                    <!-- <li><a href="{{ route('admin.settings') }}" class="admin-menu-item">
-                            <i class="fas fa-cog"></i>
-                            <span>Cài đặt hệ thống</span>
-                        </a></li> -->
-                    <!-- <li><a href="{{ route('admin.logs') }}" class="admin-menu-item">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Nhật ký hệ thống</span>
-                        </a></li> -->
+
                     <li><a href="{{ route('admin.statistics') }}" class="admin-menu-item">
                             <i class="fas fa-database"></i>
                             <span>Thống kê người dùng</span>
@@ -56,6 +49,10 @@
                     <li><a href="{{ route('admin.users') }}" class="admin-menu-item">
                             <i class="fas fa-users"></i>
                             <span>Quản lý người dùng</span>
+                        </a></li>
+                    <li><a href="{{ route('staff.register') }}" class="admin-menu-item">
+                            <i class="fas fa-users"></i>
+                            <span>Thêm nhân viên</span>
                         </a></li>
                     <li class="admin-menu-divider"></li>
                     <li><a href="{{ route('home') }}" class="admin-menu-item" target="_blank">

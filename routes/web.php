@@ -8,7 +8,14 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\PendingRegisterController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill(); // ← Dòng quan trọng: cập nhật email_verified_at
+    return redirect('/profile'); // hoặc về trang bạn muốn
+})->middleware(['auth', 'signed'])->name('verification.verify');
 
 // Trang người dùng
 
@@ -21,6 +28,9 @@ Route::get('/services', [App\Http\Controllers\UserServiceController::class, 'ind
 Route::get('/services/category/{categoryId}', [App\Http\Controllers\UserServiceController::class, 'category'])->name('user.services.category');
 Route::get('/services/{id}', [App\Http\Controllers\UserServiceController::class, 'show'])->name('user.services.show');
 
+
+Route::get('/booking/history/{userId}', [rooms_controller::class, 'getBookingHistory'])
+    ->name('booking.history');
 
 
 // Dashboard người dùng
@@ -66,20 +76,24 @@ Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->gro
     Route::put('/settings', [ProfileController::class, 'updateSettings'])->name('admin.settings.update');
     Route::put('/admin/users/{user}/status', [ProfileController::class, 'updateStatus'])->name('admin.users.status');
 
-    
+
+    Route::get('/register/staff/add', [RegisteredUserController::class, 'createStaff'])->name('staff.register');
+    Route::post('/register/staff', [RegisteredUserController::class, 'storeStaff'])->name('register.staff');
+
     // Route::post('/settings/update', [ProfileController::class, 'updatesetting'])->name('admin.settings.updatesetting');
 
 
 
     // Admin-only routes
-    Route::get('/logs', [ProfileController::class, 'logs'])->name('admin.logs');
-    Route::get('/backup', [ProfileController::class, 'backup'])->name('admin.backup');
-    Route::post('/backup', [ProfileController::class, 'createBackup'])->name('admin.backup.create');
+    // Route::get('/logs', [ProfileController::class, 'logs'])->name('admin.logs');
+    // Route::get('/backup', [ProfileController::class, 'backup'])->name('admin.backup');
+    // Route::post('/backup', [ProfileController::class, 'createBackup'])->name('admin.backup.create');
     Route::get('/users', [ProfileController::class, 'users'])->name('admin.users');
     Route::put('/users/{user}/status', [ProfileController::class, 'updateUserStatus'])->name('admin.users.status');
     Route::delete('/users/{user}', [ProfileController::class, 'deleteUser'])->name('admin.users.delete');
     Route::get('/statistics', [ProfileController::class, 'statistics'])->name('admin.statistics');
 
+    
     // Rooms
     Route::get('/rooms/create', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.create');
     Route::post('/rooms', [rooms_controller::class, 'add_room_handle'])->name('admin.rooms.store');
