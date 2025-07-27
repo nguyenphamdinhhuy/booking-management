@@ -517,6 +517,195 @@ class rooms_controller extends Controller
         }
     }
 
+
+    public function all_rooms(Request $request)
+    {
+        try {
+            // Khởi tạo query builder - lấy TẤT CẢ phòng có status = 1 (active), bao gồm cả available và unavailable
+            $query = DB::table('rooms')
+                ->select('*')
+                ->where('status', 1); // Chỉ lọc status, không lọc available
+
+            // Filter theo trạng thái phòng (available/unavailable)
+            if ($request->filled('availability')) {
+                if ($request->availability === 'available') {
+                    $query->where('available', true);
+                } elseif ($request->availability === 'unavailable') {
+                    $query->where('available', false);
+                }
+                // Nếu là 'all' thì không filter gì cả
+            }
+
+            // Filter theo số khách (nếu user chọn)
+            if ($request->filled('guests') && $request->guests > 0) {
+                $query->where('max_guests', '>=', $request->guests);
+            }
+
+            // Filter theo khoảng giá
+            if ($request->filled('min_price') && $request->min_price > 0) {
+                $query->where('price_per_night', '>=', $request->min_price);
+            }
+
+            if ($request->filled('max_price') && $request->max_price > 0) {
+                $query->where('price_per_night', '<=', $request->max_price);
+            }
+
+            // Tìm kiếm theo từ khóa
+            if ($request->filled('search') && $request->search !== '') {
+                $searchTerm = '%' . $request->search . '%';
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', $searchTerm)
+                        ->orWhere('description', 'LIKE', $searchTerm);
+                });
+            }
+
+            // Sắp xếp theo tiêu chí
+            $sortBy = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            switch ($sortBy) {
+                case 'price_low':
+                case 'price-asc':
+                    $query->orderBy('price_per_night', 'asc');
+                    break;
+                case 'price_high':
+                case 'price-desc':
+                    $query->orderBy('price_per_night', 'desc');
+                    break;
+                case 'rating-desc':
+                    // Sắp xếp theo rating (giả lập)
+                    $query->orderBy('created_at', 'desc'); // Tạm thời dùng created_at
+                    break;
+                case 'name-asc':
+                    $query->orderBy('name', 'asc');
+                    break;
+                case 'popular':
+                    // Sắp xếp ngẫu nhiên để mô phỏng độ phổ biến
+                    $query->inRandomOrder();
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+            }
+
+            // Phân trang
+            $perPage = $request->get('per_page', 20); // Tăng số lượng cho trang all rooms
+
+            // Sử dụng paginate thay vì get để có pagination
+            $rooms = $query->paginate($perPage);
+
+            // Xử lý format dữ liệu cho từng phòng
+            foreach ($rooms as $room) {
+                // Format giá tiền
+                $room->formatted_price = number_format($room->price_per_night, 0, ',', '.') . ' VND';
+
+                // Tạo giá cũ với discount (có thể lấy từ bảng promotions thực tế)
+                $room->discount_percent = rand(10, 30);
+                $room->old_price = $room->price_per_night * (1 + $room->discount_percent / 100);
+                $room->formatted_old_price = number_format($room->old_price, 0, ',', '.') . ' VND';
+
+                // Tạo rating giả (trong thực tế nên lấy từ bảng reviews)
+                $room->rating = round(rand(40, 50) / 10, 1); // 4.0 - 5.0
+                $room->review_count = rand(50, 500);
+
+                // Format ngày tạo
+                if ($room->created_at) {
+                    $room->formatted_created_at = date('d/m/Y', strtotime($room->created_at));
+                }
+
+                // Xử lý hình ảnh - kiểm tra file có tồn tại không
+                if ($room->images) {
+                    $imagePath = public_path($room->images);
+                    if (!file_exists($imagePath)) {
+                        $room->images = null; // Set null nếu file không tồn tại
+                    }
+                }
+
+                // Tạo URL cho hình ảnh mặc định nếu không có ảnh
+                if (!$room->images) {
+                    $room->images = 'assets/images/default-room.jpg'; // Đường dẫn ảnh mặc định
+                }
+
+                // Thêm thông tin bổ sung
+                $room->is_new = (strtotime($room->created_at) > strtotime('-7 days'));
+                $room->facilities = ['WiFi', 'Điều hòa', 'TV', 'Tủ lạnh']; // Có thể lấy từ bảng facilities
+
+                // Thêm class CSS cho phòng không available
+                $room->css_class = $room->available ? 'room-available' : 'room-unavailable';
+            }
+
+            // Lấy thống kê tổng quan - bao gồm cả phòng available và unavailable
+            $totalRooms = DB::table('rooms')->where('status', 1)->count();
+            $availableRooms = DB::table('rooms')->where('status', 1)->where('available', true)->count();
+            $unavailableRooms = DB::table('rooms')->where('status', 1)->where('available', false)->count();
+
+            // Tính giá trung bình chỉ từ phòng available
+            $avgPrice = DB::table('rooms')->where('status', 1)->where('available', true)->avg('price_per_night');
+            $minPrice = DB::table('rooms')->where('status', 1)->where('available', true)->min('price_per_night');
+            $maxPrice = DB::table('rooms')->where('status', 1)->where('available', true)->max('price_per_night');
+
+            $stats = [
+                'total_rooms' => $totalRooms,
+                'available_rooms' => $availableRooms,
+                'unavailable_rooms' => $unavailableRooms,
+                'avg_price' => $avgPrice ? number_format($avgPrice, 0, ',', '.') . ' VND' : '0 VND',
+                'min_price' => $minPrice ? number_format($minPrice, 0, ',', '.') . ' VND' : '0 VND',
+                'max_price' => $maxPrice ? number_format($maxPrice, 0, ',', '.') . ' VND' : '0 VND'
+            ];
+
+            // Nếu là AJAX request (cho filter động)
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'rooms' => $rooms->items(), // Lấy items từ paginated collection
+                    'stats' => $stats,
+                    'count' => $rooms->total(),
+                    'pagination' => [
+                        'current_page' => $rooms->currentPage(),
+                        'last_page' => $rooms->lastPage(),
+                        'per_page' => $rooms->perPage(),
+                        'total' => $rooms->total(),
+                        'has_more' => $rooms->hasMorePages()
+                    ]
+                ]);
+            }
+
+            // Lấy các thông tin bổ sung nếu cần
+            $serviceCategories = ServiceCategory::with('services')->get();
+
+            // Trả về view trang all rooms
+            return view('user.all_rooms', compact('rooms', 'stats', 'serviceCategories'));
+        } catch (\Exception $e) {
+            // Log lỗi
+            \Log::error('Error loading all rooms: ' . $e->getMessage());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Có lỗi khi tải danh sách phòng'
+                ]);
+            }
+
+            return view('user.all_rooms')
+                ->with('error', 'Có lỗi khi tải danh sách phòng')
+                ->with('rooms', collect([])->paginate(1)) // Empty paginated collection
+                ->with('stats', [
+                    'total_rooms' => 0,
+                    'available_rooms' => 0,
+                    'unavailable_rooms' => 0,
+                    'avg_price' => '0 VND',
+                    'min_price' => '0 VND',
+                    'max_price' => '0 VND'
+                ]);
+        }
+    }
+
+    // Method bổ sung để filter AJAX (nếu cần)
+    public function filter_rooms(Request $request)
+    {
+        // Gọi lại method all_rooms với request hiện tại
+        return $this->all_rooms($request);
+    }
+
     // Method bổ sung để lấy phòng nổi bật
     public function get_featured_rooms($limit = 6)
     {

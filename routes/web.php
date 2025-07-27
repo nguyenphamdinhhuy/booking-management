@@ -1,36 +1,50 @@
 <?php
 
-
+use App\Http\Controllers\admin\PostController;
 use App\Http\Controllers\admin\service\service_controller;
 use App\Http\Controllers\admin\rooms_controller;
+use App\Http\Controllers\admin\vouchers_controller;
 use App\Http\Controllers\admin\service\serviceCategory_cotroller;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\PendingRegisterController;
 
-
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 // Trang người dùng
+Route::get('/', [rooms_controller::class, 'user_home'])->name('index');
+Route::get('/detail/{id}', [rooms_controller::class, 'room_detail'])->name('rooms_detail');
+Route::get('/payment', [rooms_controller::class, 'payment'])->middleware('auth')->name('payment');
+Route::get('/vouchers', [vouchers_controller::class, 'user_vouchers'])->name('user.vouchers');
+Route::get('/all-rooms', [rooms_controller::class, 'all_rooms'])->name('all_rooms');
+Route::get('/filter-rooms', [rooms_controller::class, 'filter_rooms'])->name('filter_rooms');
 
-Route::get('/', [rooms_controller::class, 'user_home'])->name('home');
-route::get('/detail/{id}', [rooms_controller::class, 'room_detail'])->name('rooms_detail');
-route::get('/payment', [rooms_controller::class, 'payment'])->name('payment');
+// AJAX copy voucher code
+Route::post('/vouchers/copy', [vouchers_controller::class, 'copyVoucherCode'])->name('vouchers.copy');
+// trang dich vu nguoi dung
 
+Route::get('/service/{id}', [service_controller::class, 'serviceDetails'])->name('Service.byCategory');
 // User Services
 Route::get('/services', [App\Http\Controllers\UserServiceController::class, 'index'])->name('user.services.index');
 Route::get('/services/category/{categoryId}', [App\Http\Controllers\UserServiceController::class, 'category'])->name('user.services.category');
 Route::get('/services/{id}', [App\Http\Controllers\UserServiceController::class, 'show'])->name('user.services.show');
 
+Route::get('/services/category/{id}', [serviceCategory_cotroller::class, 'byCategory'])->name('Service.byCategory');
 
+
+
+
+// VNPay payment routes
+Route::middleware(['auth', 'verified'])->group(function () {});
 
 // Dashboard người dùng
-// Route::get('/', fn() => view('home'))
-//     ->middleware(['auth', 'verified'])
-//     ->name('home');
+Route::get('/dashboard', fn() => view('dashboard'))
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
-// Profile Routes (Unified for both User and Admin)
+// Profile người dùng
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Basic Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -48,37 +62,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Settings routes
     Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
     Route::put('/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings.update');
+
+
+    Route::get('/booking-history/{userId}', [rooms_controller::class, 'getBookingHistory'])->name('booking.history');
+    Route::get('/booking-detail/{id}', [rooms_controller::class, 'bookingDetail'])->name('booking.detail');
+    Route::post('/booking-confirm-checkout/{id}', [rooms_controller::class, 'confirmCheckout'])->name('booking.confirm.checkout');
+    Route::post('/process-payment', [rooms_controller::class, 'processPayment'])->name('process.payment');
+    Route::get('/vnpay-return', [rooms_controller::class, 'vnpayReturn'])->name('vnpay.return');
+    Route::get('/booking-success/{id}', [rooms_controller::class, 'bookingSuccess'])->name('booking.success');
 });
 
-// Admin Routes (using same ProfileController)
+// Nhóm route dành cho admin
 Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->group(function () {
-
     // Dashboard admin
     Route::get('/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
-    Route::get('/user', [ProfileController::class, 'user'])->name('admin.user');
-
-    // Admin Profile Routes (using ProfileController)
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
-    Route::get('/password', [ProfileController::class, 'password'])->name('admin.password');
-    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('admin.password.update');
-    Route::get('/settings', [ProfileController::class, 'settings'])->name('admin.settings');
-    Route::put('/settings', [ProfileController::class, 'updateSettings'])->name('admin.settings.update');
-    Route::put('/admin/users/{user}/status', [ProfileController::class, 'updateStatus'])->name('admin.users.status');
-
-    
-    // Route::post('/settings/update', [ProfileController::class, 'updatesetting'])->name('admin.settings.updatesetting');
-
-
-
-    // Admin-only routes
-    Route::get('/logs', [ProfileController::class, 'logs'])->name('admin.logs');
-    Route::get('/backup', [ProfileController::class, 'backup'])->name('admin.backup');
-    Route::post('/backup', [ProfileController::class, 'createBackup'])->name('admin.backup.create');
-    Route::get('/users', [ProfileController::class, 'users'])->name('admin.users');
-    Route::put('/users/{user}/status', [ProfileController::class, 'updateUserStatus'])->name('admin.users.status');
-    Route::delete('/users/{user}', [ProfileController::class, 'deleteUser'])->name('admin.users.delete');
-    Route::get('/statistics', [ProfileController::class, 'statistics'])->name('admin.statistics');
 
     // Rooms
     Route::get('/rooms/create', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.create');
@@ -107,15 +104,45 @@ Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->gro
     Route::put('/service/{id}', [service_controller::class, 'update'])->name('service.update');
 
     // post
-    Route::get('/post', function() {
-        return view('admin.post.add_management');
-    })->name('post.index');
+
+
+
+    // Vouchers
+    Route::get('/vouchers', [vouchers_controller::class, 'management'])->name('vouchers.management');
+    Route::get('/vouchers/create', [vouchers_controller::class, 'create'])->name('vouchers.create');
+    Route::post('/vouchers', [vouchers_controller::class, 'store'])->name('vouchers.store');
+    Route::get('/vouchers/edit/{id}', [vouchers_controller::class, 'edit'])->name('vouchers.edit');
+    Route::put('/vouchers/{id}', [vouchers_controller::class, 'update'])->name('vouchers.update');
+    Route::get('/vouchers/delete/{id}', [vouchers_controller::class, 'delete'])->name('vouchers.delete');
+
+
+    // Booking Management Routes
+    Route::get('/bookings', [rooms_controller::class, 'bookingManagement'])->name('admin.bookings.management');
+    Route::get('/bookings/{id}/view', [rooms_controller::class, 'viewBooking'])->name('admin.bookings.view');
+    Route::post('/bookings/{id}/confirm', [rooms_controller::class, 'confirmBooking'])->name('admin.bookings.confirm');
+    Route::post('/bookings/{id}/confirm-checkout', [rooms_controller::class, 'confirmCheckoutSuccess'])->name('admin.bookings.confirm.checkout');
+
+    // profile route
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
+    Route::get('/password', [ProfileController::class, 'password'])->name('admin.password');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('admin.password.update');
+    Route::get('/settings', [ProfileController::class, 'settings'])->name('admin.settings');
+    Route::put('/settings', [ProfileController::class, 'updateSettings'])->name('admin.settings.update');
+    Route::put('/admin/users/{user}/status', [ProfileController::class, 'updateStatus'])->name('admin.users.status');
+    Route::post('/settings/update', [ProfileController::class, 'updatesetting'])->name('admin.settings.updatesetting');
+
+    // Admin-only routes
+    Route::get('/logs', [ProfileController::class, 'logs'])->name('admin.logs');
+    Route::get('/backup', [ProfileController::class, 'backup'])->name('admin.backup');
+    Route::post('/backup', [ProfileController::class, 'createBackup'])->name('admin.backup.create');
+    Route::get('/users', [ProfileController::class, 'users'])->name('admin.users');
+    Route::put('/users/{user}/status', [ProfileController::class, 'updateUserStatus'])->name('admin.users.status');
+    Route::delete('/users/{user}', [ProfileController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::get('/statistics', [ProfileController::class, 'statistics'])->name('admin.statistics');
 });
 
-Route::get('/locked', function () {
-    return view('auth.locked');
-})->name('locked');
-
+// Trang sau đăng nhập
 
 // Route xác thực người dùng & xác thực email
 Auth::routes(['verify' => true]);
@@ -127,8 +154,5 @@ use App\Http\Controllers\Auth\SocialController;
 Route::get('/auth/google', [SocialController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [SocialController::class, 'handleGoogleCallback']);
 
-
-
 Route::get('/auth/zalo', [SocialController::class, 'redirectToZalo']);
 Route::get('/auth/zalo/callback', [SocialController::class, 'handleZaloCallback']);
-

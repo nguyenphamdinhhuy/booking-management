@@ -225,4 +225,73 @@ class vouchers_controller extends Controller
             ], 500);
         }
     }
+    public function user_vouchers(Request $request)
+    {
+        try {
+            // Khởi tạo query builder
+            $query = DB::table('vouchers')
+                ->where('status', 1) // Chỉ lấy voucher đang hoạt động
+                ->where('end_date', '>=', Carbon::now()); // Chỉ lấy voucher chưa hết hạn
+
+            // Lọc theo loại voucher nếu có
+            if ($request->has('type') && $request->type !== '') {
+                // Giả sử có field 'type' trong database
+                $query->where('type', $request->type);
+            }
+
+            // Tìm kiếm theo mã voucher hoặc mô tả
+            if ($request->has('search') && $request->search !== '') {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('v_code', 'LIKE', "%{$search}%")
+                        ->orWhere('description', 'LIKE', "%{$search}%");
+                });
+            }
+
+            // Sắp xếp theo discount_percent giảm dần (voucher có giá trị cao nhất trước)
+            $vouchers = $query->orderBy('discount_percent', 'desc')
+                ->orderBy('end_date', 'asc')
+                ->get();
+
+            // Phân loại vouchers
+            $featured_vouchers = $vouchers->where('discount_percent', '>=', 20)->take(3); // Voucher nổi bật
+            $all_vouchers = $vouchers;
+
+            return view('user.vouchers', compact('vouchers', 'featured_vouchers', 'all_vouchers'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Có lỗi xảy ra khi tải dữ liệu voucher: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sao chép mã voucher (AJAX)
+     */
+    public function copyVoucherCode(Request $request)
+    {
+        try {
+            $voucher = DB::table('vouchers')
+                ->where('v_id', $request->voucher_id)
+                ->where('status', 1)
+                ->where('end_date', '>=', Carbon::now())
+                ->first();
+
+            if (!$voucher) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Voucher không tồn tại hoặc đã hết hạn!'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã sao chép mã voucher: ' . $voucher->v_code,
+                'code' => $voucher->v_code
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
