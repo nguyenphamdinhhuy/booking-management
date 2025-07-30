@@ -29,11 +29,15 @@ class SocialController extends Controller
                 'password' => bcrypt(uniqid()),
             ]
         );
-        
-        
+
+        // ✅ Kiểm tra trạng thái
+        if ($user->status === 'locked') {
+            return redirect()->route('locked'); // Bạn cần có route locked và view locked.blade.php
+        }
 
         Auth::login($user);
 
+        // ✅ Điều hướng theo role
         switch ($user->role) {
             case 'admin':
                 return redirect('/admin/dashboard');

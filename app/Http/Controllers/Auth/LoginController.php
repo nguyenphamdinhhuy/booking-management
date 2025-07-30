@@ -26,20 +26,32 @@ class LoginController extends Controller
      *
      * @var string
      */
+    protected function credentials(Request $request)
+    {
+        return [
+            'email' => $request->email,
+            'password' => $request->password,
+        ];
+    }
+
 
     protected function authenticated(Request $request, $user)
     {
+        if ($user->status === 'locked') {
+            auth()->logout();
+            return redirect()->route('locked');
+        }
+
         switch ($user->role) {
             case 'admin':
                 return redirect('/admin/dashboard');
             case 'staff':
-                return redirect('/staff/dashboard');
+                return redirect('/');
             case 'user':
 
                 return redirect('http://127.0.0.1:8000/');
         }
     }
-
 
 
     /**

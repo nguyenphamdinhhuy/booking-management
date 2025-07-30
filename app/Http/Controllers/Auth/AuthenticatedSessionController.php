@@ -26,6 +26,12 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = Auth::user();
+
+        // if ($user->status === 'locked') {
+        //     Auth::logout(); 
+        //     return redirect()->route('locked'); 
+        // }
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
