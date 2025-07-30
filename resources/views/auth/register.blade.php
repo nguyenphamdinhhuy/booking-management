@@ -118,7 +118,7 @@
         </div>
 
         <button type="submit" class="btn-submit">Đăng ký</button>
-
+    
         <div class="form-footer">
             Bạn đã có tài khoản? <a href="{{ route('login') }}">Đăng nhập</a>
         </div>

@@ -10,8 +10,18 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\PendingRegisterController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill(); // ← Dòng quan trọng: cập nhật email_verified_at
+    return redirect('/profile'); // hoặc về trang bạn muốn
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+
 // Trang người dùng
 Route::get('/', [rooms_controller::class, 'user_home'])->name('index');
 Route::get('/detail/{id}', [rooms_controller::class, 'room_detail'])->name('rooms_detail');
@@ -31,6 +41,9 @@ Route::get('/services/category/{categoryId}', [App\Http\Controllers\UserServiceC
 Route::get('/services/{id}', [App\Http\Controllers\UserServiceController::class, 'show'])->name('user.services.show');
 
 Route::get('/services/category/{id}', [serviceCategory_cotroller::class, 'byCategory'])->name('Service.byCategory');
+
+Route::get('/booking/history/{userId}', [rooms_controller::class, 'getBookingHistory'])
+    ->name('booking.history');
 
 
 
@@ -76,7 +89,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->group(function () {
     // Dashboard admin
     Route::get('/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
+<<<<<<< HEAD
+=======
+    Route::get('/user', [ProfileController::class, 'user'])->name('admin.user');
 
+    // Admin Profile Routes (using ProfileController)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
+    Route::get('/password', [ProfileController::class, 'password'])->name('admin.password');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('admin.password.update');
+    Route::get('/settings', [ProfileController::class, 'settings'])->name('admin.settings');
+    Route::put('/settings', [ProfileController::class, 'updateSettings'])->name('admin.settings.update');
+    Route::put('/admin/users/{user}/status', [ProfileController::class, 'updateStatus'])->name('admin.users.status');
+
+
+    Route::get('/register/staff/add', [RegisteredUserController::class, 'createStaff'])->name('staff.register');
+    Route::post('/register/staff', [RegisteredUserController::class, 'storeStaff'])->name('register.staff');
+
+    // Route::post('/settings/update', [ProfileController::class, 'updatesetting'])->name('admin.settings.updatesetting');
+
+
+
+    // Admin-only routes
+    // Route::get('/logs', [ProfileController::class, 'logs'])->name('admin.logs');
+    // Route::get('/backup', [ProfileController::class, 'backup'])->name('admin.backup');
+    // Route::post('/backup', [ProfileController::class, 'createBackup'])->name('admin.backup.create');
+    Route::get('/users', [ProfileController::class, 'users'])->name('admin.users');
+    Route::put('/users/{user}/status', [ProfileController::class, 'updateUserStatus'])->name('admin.users.status');
+    Route::delete('/users/{user}', [ProfileController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::get('/statistics', [ProfileController::class, 'statistics'])->name('admin.statistics');
+>>>>>>> 15562ff48cbc10022713d2f9903b20e98561c4af
+
+    
     // Rooms
     Route::get('/rooms/create', [rooms_controller::class, 'add_room_form'])->name('admin.rooms.create');
     Route::post('/rooms', [rooms_controller::class, 'add_room_handle'])->name('admin.rooms.store');
