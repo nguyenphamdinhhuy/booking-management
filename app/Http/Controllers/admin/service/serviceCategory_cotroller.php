@@ -66,7 +66,12 @@ class serviceCategory_cotroller extends Controller
      */
     public function edit(string $id)
     {
+        // $category = ServiceCategory::findOrFail($id);
+        // return view('admin.service.edit_serviceCategory', compact('category'));
+
+        // xoa mem 
         $category = ServiceCategory::findOrFail($id);
+        $category->delete();
         return view('admin.service.edit_serviceCategory', compact('category'));
     }
 
@@ -83,11 +88,11 @@ class serviceCategory_cotroller extends Controller
 
         $category = ServiceCategory::findOrFail($id);
         $imagePath = $category->image;
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $fileName = time() . '_' .$file->getClientOriginalName();
-            $file->move(public_path('upload/services'),$fileName);
-            $imagePath = 'upload/services/' .$fileName;
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('upload/services'), $fileName);
+            $imagePath = 'upload/services/' . $fileName;
         }
         $category->update([
             'name' => $request->name,

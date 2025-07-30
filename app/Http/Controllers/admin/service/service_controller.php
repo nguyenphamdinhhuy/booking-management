@@ -15,10 +15,17 @@ class service_controller extends Controller
     {
         $query = Service::with('category');
         // loc danh muc nha may em
-        if ($request->has('category_id') && $request->category_id) {
+        if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
-
+        // loc theo trang thai 
+        if ($request->filled('is_available')) {
+            $query->where('is_available', $request->is_available);
+        }
+        //tim kiem
+        if($request->filled('keyword')){
+            $query->where('name','like', '%'.$request->keyword.'%');
+        }
         $services = $query->get();
         $categories = ServiceCategory::all();
 
@@ -32,6 +39,7 @@ class service_controller extends Controller
     {
         $categories = ServiceCategory::all(); // để chọn danh mục
         return view('admin.service.add_service', compact('categories'));
+
     }
 
 

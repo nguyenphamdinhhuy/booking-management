@@ -40,6 +40,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/booking-history/{userId}', [rooms_controller::class, 'getBookingHistory'])->name('booking.history');
+    Route::get('/booking-detail/{id}', [rooms_controller::class, 'bookingDetail'])->name('booking.detail');
+    Route::post('/booking-confirm-checkout/{id}', [rooms_controller::class, 'confirmCheckout'])->name('booking.confirm.checkout');
 });
 
 // Nhóm route dành cho admin
@@ -84,6 +86,13 @@ Route::middleware(['auth', 'verified', 'checkrole:admin'])->prefix('admin')->gro
     Route::get('/vouchers/edit/{id}', [vouchers_controller::class, 'edit'])->name('vouchers.edit');
     Route::put('/vouchers/{id}', [vouchers_controller::class, 'update'])->name('vouchers.update');
     Route::get('/vouchers/delete/{id}', [vouchers_controller::class, 'delete'])->name('vouchers.delete');
+
+
+    // Booking Management Routes
+    Route::get('/bookings', [rooms_controller::class, 'bookingManagement'])->name('admin.bookings.management');
+    Route::get('/bookings/{id}/view', [rooms_controller::class, 'viewBooking'])->name('admin.bookings.view');
+    Route::post('/bookings/{id}/confirm', [rooms_controller::class, 'confirmBooking'])->name('admin.bookings.confirm');
+    Route::post('/bookings/{id}/confirm-checkout', [rooms_controller::class, 'confirmCheckoutSuccess'])->name('admin.bookings.confirm.checkout');
 });
 
 // Trang sau đăng nhập
