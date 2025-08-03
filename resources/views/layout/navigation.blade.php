@@ -10,7 +10,6 @@
   .profile-menu li a:hover,
   .profile-menu li form button:hover {
     color: #007bff;
-    /* Màu chữ khi hover */
   }
 
   .profile-dropdown {
@@ -19,7 +18,6 @@
     right: 0;
     background: white;
     border-radius: 18px;
-    /* border: 1px solid #ccc; */
     display: none;
     z-index: 1000;
     min-width: 220px;
@@ -97,15 +95,13 @@
     <nav class="bk-header__nav">
       <ul class="bk-header__nav-list">
         <li><a href="{{ route('user.services.index') }}" class="bk-header__nav-link">Dịch vụ</a></li>
-        <li><a href="#" class="bk-header__nav-link">Ưu đãi</a></li>
+        <li><a href="{{ route('user.vouchers') }}" class="bk-header__nav-link">Ưu đãi</a></li>
         @auth
-
       <li><a href="{{ route('booking.history', ['userId' => auth()->id()]) }}" class="bk-header__nav-link">Hóa đơn của
         tôi</a></li>
     @endauth
-
         <li><a href="#" class="bk-header__nav-link">Hỗ trợ</a></li>
-        <li><a href="#" class="bk-header__nav-link">Chỗ nghỉ của Quý vị</a></li>
+        <li><a href="{{ route('all_rooms') }}" class="bk-header__nav-link">Chỗ nghỉ của Quý vị</a></li>
       </ul>
     </nav>
 
@@ -114,57 +110,47 @@
       <a href="{{ route('register') }}" class="bk-header__action-btn bk-header__action-signup">Đăng ký</a>
       <a href="{{ route('login') }}" class="bk-header__action-btn bk-header__action-login">Đăng nhập</a>
     @else
-
-      <span>Chào, {{ Auth::user()->name }}</span>
-      <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-      @csrf
-      <button type="submit" class="bk-header__action-btn">Đăng xuất</button>
-      </form>
-    @endguest
-
       <div class="user-dropdown">
-        <div class="profile-trigger" onclick="toggleProfileDropdown()">
-          <img
-            src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-            class="user-avatar" alt="Avatar">
-          <span>{{ Auth::user()->name }}</span>
-          <i class="fas fa-chevron-down"></i>
+      <div class="profile-trigger" onclick="toggleProfileDropdown()">
+        <img
+        src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
+        class="user-avatar" alt="Avatar">
+        <span>{{ Auth::user()->name }}</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-header">
+        <img
+          src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
+          class="user-avatar-large" alt="Avatar">
+        <div class="profile-info">
+          <strong>{{ Auth::user()->name }}</strong>
+          <small>{{ Auth::user()->email }}</small>
         </div>
-
-        <div class="profile-dropdown" id="profileDropdown">
-          <div class="profile-header">
-            <img
-              src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}"
-              class="user-avatar-large" alt="Avatar">
-            <div class="profile-info">
-              <strong>{{ Auth::user()->name }}</strong>
-              <small>{{ Auth::user()->email }}</small>
-            </div>
-            @if (Auth::user()->role == 'admin')
-        <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">
-          <i class="fas fa-user-shield"></i>
-        </a>
+        @if (Auth::user()->role == 'admin')
+      <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">
+        <i class="fas fa-user-shield"></i>
+      </a>
 
 
       @endif
-          </div>
-          <ul class="profile-menu">
-            <li><a href="{{ route('profile.edit') }}"><i class="fa-solid fa-user"></i> Thông tin cá nhân</a></li>
-            <li><a href="{{ route('profile.password') }}"><i class="fa-solid fa-lock"></i> Đổi mật khẩu</a></li>
-            <li><a href="{{ route('profile.orders') }}"><i class="fa-solid fa-shopping-bag"></i> Đơn đặt phòng</a></li>
-            <li><a href="{{ route('profile.favorites') }}"><i class="fa-solid fa-heart"></i> Yêu thích</a></li>
-            <li><a href="{{ route('profile.settings') }}"><i class="fa-solid fa-cog"></i> Cài đặt</a></li>
-            <li>
-              <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"><i class="fa-solid fa-sign-out-alt"></i> Đăng xuất</button>
-              </form>
-            </li>
-          </ul>
         </div>
+        <ul class="profile-menu">
+        <li><a href="{{ route('profile.edit') }}"><i class="fa-solid fa-user"></i> Thông tin cá nhân</a></li>
+        <li><a href="{{ route('profile.password') }}"><i class="fa-solid fa-lock"></i> Đổi mật khẩu</a></li>
+        <li><a href="{{ route('profile.orders') }}"><i class="fa-solid fa-shopping-bag"></i> Đơn đặt phòng</a></li>
+        <li><a href="{{ route('profile.favorites') }}"><i class="fa-solid fa-heart"></i> Yêu thích</a></li>
+        <li><a href="{{ route('profile.settings') }}"><i class="fa-solid fa-cog"></i> Cài đặt</a></li>
+        <li>
+          <form method="POST" action="{{ route('logout') }}">
+          @csrf
+          <button type="submit"><i class="fa-solid fa-sign-out-alt"></i> Đăng xuất</button>
+          </form>
+        </li>
+        </ul>
       </div>
-
-
+      </div>
+    @endguest
     </div>
 
     <!-- Mobile menu button -->

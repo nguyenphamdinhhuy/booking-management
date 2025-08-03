@@ -42,7 +42,7 @@
                     Mã Voucher <span class="required">*</span>
                 </label>
                 <input type="text" id="v_code" name="v_code" class="form-input"
-                    value="{{ old('v_code') }}" maxlength="10" required
+                    value="{{ old('v_code') }}" maxlength="10"
                     placeholder="Nhập mã voucher (tối đa 10 ký tự)">
                 <small class="form-text">Mã voucher sẽ được tự động chuyển thành chữ hoa</small>
             </div>
@@ -54,7 +54,7 @@
                     Phần Trăm Giảm Giá <span class="required">*</span>
                 </label>
                 <input type="number" id="discount_percent" name="discount_percent" class="form-input"
-                    value="{{ old('discount_percent') }}" min="0" max="100" step="0.01" required
+                    value="{{ old('discount_percent') }}" min="0" max="100" step="0.01"
                     placeholder="Nhập phần trăm giảm giá (0-100)">
             </div>
 
@@ -65,7 +65,7 @@
                     Ngày Bắt Đầu <span class="required">*</span>
                 </label>
                 <input type="datetime-local" id="start_date" name="start_date" class="form-input"
-                    value="{{ old('start_date') }}" required>
+                    value="{{ old('start_date') }}">
             </div>
 
             <!-- End Date -->
@@ -75,7 +75,7 @@
                     Ngày Kết Thúc <span class="required">*</span>
                 </label>
                 <input type="datetime-local" id="end_date" name="end_date" class="form-input"
-                    value="{{ old('end_date') }}" required>
+                    value="{{ old('end_date') }}">
             </div>
 
             <!-- Status -->
@@ -84,7 +84,7 @@
                     <i class="fas fa-toggle-on"></i>
                     Trạng Thái <span class="required">*</span>
                 </label>
-                <select id="status" name="status" class="form-select" required>
+                <select id="status" name="status" class="form-select">
                     <option value="">Chọn trạng thái</option>
                     <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Hoạt động</option>
                     <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Không hoạt động</option>

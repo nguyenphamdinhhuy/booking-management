@@ -2,362 +2,406 @@
 
 @section('title', $service->name)
 
-
-
 @section('content')
-    <div class="container mx-auto px-4 py-8">
-        <!-- Breadcrumb -->
-        <!-- <nav class="flex mb-8" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="{{ route('home') }}"
-                        class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                        <i class="fas fa-home mr-2"></i>
-                        Trang chủ
-                    </a>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                        <a href="{{ route('user.services.index') }}"
-                            class="text-sm font-medium text-gray-700 hover:text-blue-600">
-                            Dịch vụ
-                        </a>
-                    </div>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                        <span class="text-sm font-medium text-gray-500">{{ $service->name }}</span>
-                    </div>
-                </li>
-            </ol>
-        </nav> -->
+<div class="booking-container">
+    <!-- Breadcrumb -->
+    <nav class="booking-breadcrumb">
+        <div class="breadcrumb-list">
+            <a href="{{ route('home') }}" class="breadcrumb-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+                Trang chủ
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{{ route('user.services.index') }}" class="breadcrumb-link">Dịch vụ</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">{{ $service->name }}</span>
+        </div>
+    </nav>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Main Content -->
-            <div class="lg:col-span-2">
-                <!-- Service Image -->
-                <div class="service-detail-image">
-                    @if($service->image)
-                        <img src="{{ asset($service->image) }}" alt="{{ $service->name }}" class="w-full h-96 object-cover">
-                    @else
-                        <div class="w-full h-96 bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-image text-6xl text-gray-400"></i>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Service Details -->
-                <div class="service-detail-content">
-                    <div class="flex items-center justify-between mb-4">
-                        <h1 class="text-3xl font-bold text-gray-800">{{ $service->name }}</h1>
-                        <span class="service-status">
-                            Có sẵn
-                        </span>
-                    </div>
-
-                    <div class="flex items-center mb-6">
-                        <span class="service-detail-price">{{ number_format($service->price) }} VNĐ</span>
-                        <span class="text-gray-500 ml-2">/ {{ $service->unit }}</span>
-                    </div>
-
-                    @if($service->description)
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Mô tả dịch vụ</h3>
-                            <p class="text-gray-600 leading-relaxed">{{ $service->description }}</p>
-                        </div>
-                    @endif
-
-                    <!-- Service Category -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Danh mục</h3>
-                        <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                            {{ $service->category->name }}
-                        </span>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex flex-wrap gap-4">
-                        <button class="action-btn action-btn-primary contact-btn">
-                            <i class="fas fa-phone mr-2"></i>Liên hệ đặt dịch vụ
-                        </button>
-                        <button class="action-btn action-btn-secondary favorite-btn">
-                            <i class="fas fa-heart mr-2"></i>Yêu thích
-                        </button>
-                        <button class="action-btn action-btn-secondary share-btn">
-                            <i class="fas fa-share mr-2"></i>Chia sẻ
-                        </button>
+    <!-- Main Content -->
+    <div class="booking-main">
+        <!-- Left Column -->
+        <div class="booking-content">
+            <!-- Service Header -->
+            <div class="service-header">
+                <div class="service-title-section">
+                    <h1 class="service-title">{{ $service->name }}</h1>
+                    <div class="service-meta">
+                        <span class="service-category">{{ $service->category->name }}</span>
+                        <span class="service-status-badge">Có sẵn</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="lg:col-span-1">
-                <!-- Quick Info -->
-                <div class="sidebar-card">
-                    <h3>Thông tin nhanh</h3>
-                    <div class="space-y-3">
-                        <div class="info-item">
-                            <i class="fas fa-tag text-blue-600"></i>
-                            <span class="text-gray-600">Danh mục: {{ $service->category->name }}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-money-bill text-green-600"></i>
-                            <span class="text-gray-600">Giá: {{ number_format($service->price) }} VNĐ</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-ruler text-purple-600"></i>
-                            <span class="text-gray-600">Đơn vị: {{ $service->unit }}</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-check-circle text-green-600"></i>
-                            <span class="text-gray-600">Trạng thái: Có sẵn</span>
-                        </div>
-                    </div>
+            <!-- Service Images -->
+            <div class="service-gallery">
+                @if($service->image)
+                <div class="main-image">
+                    <img src="{{ asset($service->image) }}" alt="{{ $service->name }}">
                 </div>
-
-                <!-- Contact Info -->
-                <!-- <div class="sidebar-card">
-                    <h3>Liên hệ</h3>
-                    <div class="space-y-3">
-                        <div class="info-item">
-                            <i class="fas fa-phone text-blue-600"></i>
-                            <span class="text-gray-600">0123 456 789</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-envelope text-blue-600"></i>
-                            <span class="text-gray-600">info@hotel.com</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt text-blue-600"></i>
-                            <span class="text-gray-600">123 Đường ABC, Quận XYZ</span>
-                        </div>
-                    </div>
-                </div> -->
-
-                <!-- Related Services -->
-                @if($relatedServices->count() > 0)
-                    <div class="sidebar-card">
-                        <h3>Dịch vụ liên quan</h3>
-                        <div class="space-y-4">
-                            @foreach($relatedServices as $relatedService)
-                                <div class="related-service">
-                                    @if($relatedService->image)
-                                        <img src="{{ asset($relatedService->image) }}" alt="{{ $relatedService->name }}"
-                                            class="w-16 h-16 object-cover rounded-lg">
-                                    @else
-                                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-image text-gray-400"></i>
-                                        </div>
-                                    @endif
-                                    <div class="related-service-info">
-                                        <h4 class="related-service-name">{{ $relatedService->name }}</h4>
-                                        <p class="related-service-price">{{ number_format($relatedService->price) }} VNĐ</p>
-                                    </div>
-                                    <a href="{{ route('user.services.show', $relatedService->s_id) }}"
-                                        class="text-blue-600 hover:text-blue-800">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </a>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
+                @else
+                <div class="main-image placeholder">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                    </svg>
+                </div>
                 @endif
             </div>
+
+            <!-- Service Description -->
+            @if($service->description)
+            <div class="service-description">
+                <h2 class="section-title">Mô tả dịch vụ</h2>
+                <p class="description-text">{{ $service->description }}</p>
+            </div>
+            @endif
+
+            <!-- Service Details -->
+            <div class="service-details">
+                <h2 class="section-title">Chi tiết dịch vụ</h2>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
+                        <span>Danh mục: {{ $service->category->name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                        <span>Đơn vị: {{ $service->unit }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
+                        <span>Trạng thái: Có sẵn</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="booking-sidebar">
+            <!-- Booking Card -->
+            <div class="booking-card">
+                <div class="price-section">
+                    <span class="price-amount">{{ number_format($service->price) }}</span>
+                    <span class="price-currency">VNĐ</span>
+                    <span class="price-unit">/ {{ $service->unit }}</span>
+                </div>
+
+                <div class="booking-actions">
+                    <button class="btn-primary contact-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                        </svg>
+                        Liên hệ đặt dịch vụ
+                    </button>
+
+
+                </div>
+
+                <!-- Service Info -->
+                <div class="service-info">
+                    <div class="info-row">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
+                        <span>Xác nhận tức thì</span>
+                    </div>
+                    <div class="info-row">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                        <span>Hỗ trợ 24/7</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Services -->
+            @if($relatedServices->count() > 0)
+            <div class="related-services">
+                <h3 class="related-title">Dịch vụ tương tự</h3>
+                <div class="related-list">
+                    @foreach($relatedServices as $relatedService)
+                    <a href="{{ route('user.services.show', $relatedService->s_id) }}" class="related-item">
+                        <div class="related-image">
+                            @if($relatedService->image)
+                            <img src="{{ asset($relatedService->image) }}" alt="{{ $relatedService->name }}">
+                            @else
+                            <div class="image-placeholder">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                                </svg>
+                            </div>
+                            @endif
+                        </div>
+                        <div class="related-info">
+                            <div class="related-name">{{ $relatedService->name }}</div>
+                            <div class="related-price">{{ number_format($relatedService->price) }} VNĐ</div>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
     </div>
-
-    @endsection
+</div>
 
 <style>
-    /* Service Detail Page Styles */
-    
-    /* Service Detail Image */
-    .service-detail-image {
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        margin-bottom: 24px;
+    /* === GLOBAL RESETS === */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f7f9fb;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
     }
 
-    .service-detail-image img {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
+    a {
+        text-decoration: none;
+        color: #2980b9;
+        transition: 0.3s;
     }
 
-    /* Service Detail Content */
-    .service-detail-content {
-        background: white;
-        border-radius: 16px;
-        padding: 32px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    a:hover {
+        color: #1abc9c;
     }
 
-    /* Service Status */
-    .service-status {
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-        padding: 6px 16px;
-        border-radius: 20px;
+    /* === BREADCRUMB === */
+    .booking-breadcrumb {
+        padding: 20px 0;
+        background-color: #ecf0f1;
         font-size: 14px;
-        font-weight: 600;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-bottom: 1px solid #dcdcdc;
     }
 
-    /* Service Detail Price */
-    .service-detail-price {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-size: 24px;
+    .breadcrumb-list {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #7f8c8d;
+    }
+
+    .breadcrumb-link svg {
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+
+    .breadcrumb-current {
+        color: #2c3e50;
         font-weight: bold;
-        display: inline-block;
-        margin-bottom: 24px;
     }
 
-    /* Action Buttons */
-    .action-btn {
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border: none;
-        font-size: 16px;
-    }
-
-    .action-btn-primary {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
-    }
-
-    .action-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    .action-btn-secondary {
-        background: white;
-        color: #374151;
-        border: 2px solid #e5e7eb;
-    }
-
-    .action-btn-secondary:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
-        transform: translateY(-2px);
-    }
-
-    /* Sidebar */
-    .sidebar-card {
-        background: white;
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .sidebar-card h3 {
-        color: #1f2937;
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 16px;
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 8px;
-    }
-
-    .info-item {
+    /* === MAIN LAYOUT === */
+    .booking-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
         display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-        padding: 8px 0;
+        flex-direction: column;
+        gap: 30px;
     }
 
-    .info-item i {
-        width: 20px;
-        margin-right: 12px;
-        font-size: 16px;
-    }
-
-    /* Related Services */
-    .related-service {
+    .booking-main {
         display: flex;
-        align-items: center;
-        padding: 12px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        cursor: pointer;
+        flex-direction: row;
+        gap: 30px;
     }
 
-    .related-service:hover {
-        background: #f9fafb;
-        transform: translateX(4px);
+    .booking-content {
+        flex: 2;
     }
 
-    .related-service img {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-right: 12px;
-    }
-
-    .related-service-info {
+    .booking-sidebar {
         flex: 1;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
     }
 
-    .related-service-name {
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 4px;
+    /* === SERVICE HEADER === */
+    .service-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .service-meta {
+        display: flex;
+        gap: 15px;
+        color: #7f8c8d;
         font-size: 14px;
     }
 
-    .related-service-price {
-        color: #ef4444;
-        font-weight: 600;
-        font-size: 14px;
+    .service-status-badge {
+        background-color: #2ecc71;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
     }
 
-    /* Breadcrumb */
-    .breadcrumb {
+    /* === IMAGE GALLERY === */
+    .service-gallery {
+        margin: 20px 0;
+    }
+
+    .main-image {
+        width: 100%;
+        height: 350px;
+        background-color: #ecf0f1;
         display: flex;
         align-items: center;
-        margin-bottom: 32px;
+        justify-content: center;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* === DESCRIPTION & DETAILS === */
+    .section-title {
+        font-size: 20px;
+        margin: 20px 0 10px;
+        color: #34495e;
+    }
+
+    .description-text {
+        line-height: 1.6;
+        color: #2c3e50;
+    }
+
+    .details-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        color: #2c3e50;
+    }
+
+    /* === SIDEBAR BOOKING CARD === */
+    .booking-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+    }
+
+    .price-section {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-bottom: 15px;
+        font-size: 22px;
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    .price-unit {
         font-size: 14px;
+        color: #7f8c8d;
     }
 
-    .breadcrumb-item {
-        color: #6b7280;
-        transition: color 0.3s ease;
+    .btn-primary {
+        width: 100%;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
     }
 
-    .breadcrumb-item:hover {
-        color: #3b82f6;
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1abc9c, #16a085);
     }
 
-    .breadcrumb-separator {
-        margin: 0 8px;
-        color: #d1d5db;
+    .service-info {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 14px;
+        color: #2c3e50;
     }
 
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .service-detail-content {
-            padding: 20px;
-        }
-        
-        .action-btn {
-            width: 100%;
-            margin-bottom: 12px;
-        }
-        
-        .service-detail-price {
-            font-size: 20px;
-            padding: 10px 20px;
-        }
+    .info-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* === RELATED SERVICES === */
+    .related-services {
+        margin-top: 40px;
+    }
+
+    .related-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .related-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .related-item {
+        display: flex;
+        gap: 15px;
+        background-color: #ffffff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s;
+    }
+
+    .related-item:hover {
+        transform: translateY(-3px);
+    }
+
+    .related-image img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .related-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        font-size: 14px;
+        color: #2c3e50;
+    }
+
+    .related-price {
+        color: #e74c3c;
+        font-weight: bold;
+        margin-top: 5px;
     }
 </style>
+@endsection
