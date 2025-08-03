@@ -23,7 +23,7 @@
                             </div>
                             <h3>Chưa có đơn đặt phòng nào</h3>
                             <p>Bạn chưa có đơn đặt phòng nào. Hãy khám phá các phòng khách sạn tuyệt vời!</p>
-                            <a href="{{ route('home') }}" class="btn btn-primary">
+                            <a href="{{ route('index') }}" class="btn btn-primary">
                                 <i class="fas fa-search"></i> Tìm phòng ngay
                             </a>
                         </div>

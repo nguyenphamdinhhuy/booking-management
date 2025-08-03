@@ -63,20 +63,28 @@
                     <div class="booking-info">
                         <h4 class="booking-info-title">Thông tin đơn hàng</h4>
                         <div class="booking-info-list">
-                            <div class="booking-info-item"><span>Mã đơn:</span> <strong>#<?php echo e($booking->b_id); ?></strong></div>
-                            <div class="booking-info-item"><span>Khách hàng:</span> <?php echo e($user->name ?? 'N/A'); ?></div>
-                            <div class="booking-info-item"><span>Email:</span> <?php echo e($user->email ?? 'N/A'); ?></div>
-                            <div class="booking-info-item"><span>Trạng thái:</span> <span class="booking-status">Đã thanh toán</span></div>
+                            <div class="booking-info-item"><span>Mã đơn:</span>
+                                <strong>#<?php echo e($booking->b_id); ?></strong></div>
+                            <div class="booking-info-item"><span>Khách hàng:</span>
+                                <?php echo e($user->name ?? 'N/A'); ?></div>
+                            <div class="booking-info-item"><span>Email:</span> <?php echo e($user->email ?? 'N/A'); ?>
+                            </div>
+                            <div class="booking-info-item"><span>Trạng thái:</span> <span class="booking-status">Đã
+                                    thanh toán</span></div>
                         </div>
                     </div>
 
                     <div class="booking-info">
                         <h4 class="booking-info-title">Thông tin phòng</h4>
                         <div class="booking-info-list">
-                            <div class="booking-info-item"><span>Tên phòng:</span> <?php echo e($room->name ?? 'N/A'); ?></div>
-                            <div class="booking-info-item"><span>Giá/đêm:</span> <?php echo e($room->formatted_price ?? 'N/A'); ?></div>
-                            <div class="booking-info-item"><span>Số khách:</span> <?php echo e($details->guests ?? 'N/A'); ?> người</div>
-                            <div class="booking-info-item"><span>Số đêm:</span> <?php echo e($booking->nights ?? 1); ?> đêm</div>
+                            <div class="booking-info-item"><span>Tên phòng:</span>
+                                <?php echo e($room->name ?? 'N/A'); ?></div>
+                            <div class="booking-info-item"><span>Giá/đêm:</span>
+                                <?php echo e($room->formatted_price ?? 'N/A'); ?></div>
+                            <div class="booking-info-item"><span>Số khách:</span>
+                                <?php echo e($details->guests ?? 'N/A'); ?> người</div>
+                            <div class="booking-info-item"><span>Số đêm:</span> <?php echo e($booking->nights ?? 1); ?>
+                                đêm</div>
                         </div>
                     </div>
                 </div>
@@ -86,14 +94,16 @@
                         <i class="fas fa-calendar-check booking-date-icon"></i>
                         <div>
                             <div class="booking-date-label">Ngày nhận phòng</div>
-                            <div class="booking-date-value"><?php echo e($booking->formatted_check_in ?? 'N/A'); ?></div>
+                            <div class="booking-date-value"><?php echo e($booking->formatted_check_in ?? 'N/A'); ?>
+                            </div>
                         </div>
                     </div>
                     <div class="booking-date-box">
                         <i class="fas fa-calendar-times booking-date-icon"></i>
                         <div>
                             <div class="booking-date-label">Ngày trả phòng</div>
-                            <div class="booking-date-value"><?php echo e($booking->formatted_check_out ?? 'N/A'); ?></div>
+                            <div class="booking-date-value"><?php echo e($booking->formatted_check_out ?? 'N/A'); ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -103,13 +113,14 @@
                     <div class="booking-info-list">
                         <div class="booking-info-item">
                             <span>Giá phòng (<?php echo e($booking->nights ?? 1); ?> đêm):</span>
-                            <?php echo e(number_format(($room->price_per_night ?? 0) * ($booking->nights ?? 1), 0, ',', '.')); ?> VND
+                            <?php echo e(number_format(($room->price_per_night ?? 0) * ($booking->nights ?? 1), 0, ',', '.')); ?>
+                            VND
                         </div>
-                        <?php if($voucher): ?>
-                        <div class="booking-info-item">
-                            <span>Mã giảm giá (<?php echo e($voucher->v_code ?? ''); ?>):</span>
-                            -<?php echo e(number_format($details->discount_amount ?? 0, 0, ',', '.')); ?> VND
-                        </div>
+                        <?php if ($voucher): ?>
+                            <div class="booking-info-item">
+                                <span>Mã giảm giá (<?php echo e($voucher->v_code ?? ''); ?>):</span>
+                                -<?php echo e(number_format($details->discount_amount ?? 0, 0, ',', '.')); ?> VND
+                            </div>
                         <?php endif; ?>
                         <div class="booking-info-item booking-total">
                             <span>Tổng thanh toán:</span>
@@ -118,28 +129,32 @@
                     </div>
                 </div>
 
-                <?php if($room && $room->images): ?>
-                <div class="booking-room-preview">
-                    <h4 class="booking-info-title">Hình ảnh phòng</h4>
-                    <div class="booking-room-box">
-                        <img src="<?php echo e(asset($room->images)); ?>" class="booking-room-image" alt="<?php echo e($room->name); ?>">
-                        <div class="booking-room-details">
-                            <h5><?php echo e($room->name); ?></h5>
-                            <p><?php echo e($room->description ?? 'Không có mô tả'); ?></p>
-                            <div class="booking-room-tags">
-                                <span><i class="fas fa-users"></i> <?php echo e($room->max_guests ?? 'N/A'); ?> khách</span>
-                                <span><i class="fas fa-bed"></i> <?php echo e($room->number_beds ?? 'N/A'); ?> giường</span>
+                <?php if ($room && $room->images): ?>
+                    <div class="booking-room-preview">
+                        <h4 class="booking-info-title">Hình ảnh phòng</h4>
+                        <div class="booking-room-box">
+                            <img src="<?php echo e(asset($room->images)); ?>" class="booking-room-image"
+                                alt="<?php echo e($room->name); ?>">
+                            <div class="booking-room-details">
+                                <h5><?php echo e($room->name); ?></h5>
+                                <p><?php echo e($room->description ?? 'Không có mô tả'); ?></p>
+                                <div class="booking-room-tags">
+                                    <span><i class="fas fa-users"></i> <?php echo e($room->max_guests ?? 'N/A'); ?>
+                                        khách</span>
+                                    <span><i class="fas fa-bed"></i> <?php echo e($room->number_beds ?? 'N/A'); ?>
+                                        giường</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
 
                 <div class="booking-actions">
                     <a href="<?php echo e(route('index')); ?>" class="booking-btn booking-btn-primary">
                         <i class="fas fa-home"></i> Về trang chủ
                     </a>
-                    <a href="<?php echo e(route('booking.history', ['userId' => Auth::id()])); ?>" class="booking-btn booking-btn-secondary">
+                    <a href="<?php echo e(route('booking.history', ['userId' => Auth::id()])); ?>"
+                        class="booking-btn booking-btn-secondary">
                         <i class="fas fa-history"></i> Lịch sử đặt phòng
                     </a>
                 </div>
@@ -148,7 +163,8 @@
                     <h4 class="booking-info-title">Cần hỗ trợ?</h4>
                     <p><i class="fas fa-phone"></i> Hotline: <strong>1900 1234</strong></p>
                     <p><i class="fas fa-envelope"></i> Email: <strong>support@hotel.com</strong></p>
-                    <p><i class="fas fa-info-circle"></i> Chúng tôi sẽ liên hệ trước ngày nhận phòng để xác nhận thông tin.</p>
+                    <p><i class="fas fa-info-circle"></i> Chúng tôi sẽ liên hệ trước ngày nhận phòng để xác nhận thông
+                        tin.</p>
                 </div>
             </div>
         </div>

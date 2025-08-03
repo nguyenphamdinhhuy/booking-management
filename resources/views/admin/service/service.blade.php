@@ -60,7 +60,7 @@
                 <div class="filter-group">
                     <label class="filter-label">Tìm kiếm</label>
                     <input type="text" name="keyword" value="{{ request('keyword') }}" class="filter-input"
-                        placeholder="Tên phòng...">
+                        placeholder="Tên dịch vụ...">
                 </div>
             </div>
         </form>

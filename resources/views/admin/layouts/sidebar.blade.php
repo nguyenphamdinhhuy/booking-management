@@ -33,7 +33,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('statistical.index') }}" class="nav-link">
                 <i class="fas fa-chart-line"></i>
                 <span>Báo cáo & Thống kê</span>
             </a>
@@ -48,6 +48,12 @@
             <a href="#" class="nav-link">
                 <i class="fas fa-star"></i>
                 <span>Đánh giá & Phản hồi</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('admin.contacts.index') }}" class="nav-link">
+                <i class="fas fa-bell"></i>
+                <span>Liên hệ</span>
             </a>
         </li>
         <li class="nav-item">
@@ -68,11 +74,6 @@
                 <span>Cài đặt hệ thống</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-bell"></i>
-                <span>Thông báo</span>
-            </a>
-        </li>
+
     </ul>
 </nav>

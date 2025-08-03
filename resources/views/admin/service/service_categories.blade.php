@@ -38,30 +38,39 @@
         </div>
 
         <!-- Filter Bar -->
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label class="filter-label">Trạng thái</label>
-                <select class="filter-select" onchange="filterRooms()">
-                    <option value="">Tất cả</option>
-                    <option value="1">Hoạt động</option>
-                    <option value="0">Không hoạt động</option>
-                </select>
+        <form method="GET" action="{{ route('service-categories.index') }}">
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label class="filter-lable">Trạng thái</label>
+                    <select name="is_available" class="filter-select" onchange="this.form.submit()" id="">
+                        <option value="" {{ request('is_available') === null || request('is_available') === '' ? 'selected' : '' }}>Tất cả</option>
+                        <option value="1" {{ request('is_available') === '1' ? 'selected' : '' }}>Hoạt động</option>
+                        <option value="0" {{ request('is_available') === '0' ? 'selected' : '' }}>Ngưng</option>
+
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Loại Dịnh vụ</label>
+                    <select name="id" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        @foreach ($service_Category as $cat)
+                            <option value="{{ $cat->id }}" {{ request('id') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-lable" for="">Tìm kiếm</label>
+                    <input type="text" name="keyword" value="{{ request('keyword') }}" class="filter-input"
+                        placeholder="Ten loai dich vụ...">
+                </div>
             </div>
-            <div class="filter-group">
-                <label class="filter-label">Loại dịch vụ</label>
-                <select class="filter-select" onchange="filterRooms()">
-                    <option value="">Tất cả</option>
-                    <option value="0-500000">Đưa đón</option>
-                    <option value="500000-1000000">Đặt đồ ăn</option>
-                    <option value="1000000-2000000">Tậm gym</option>
-                    <option value="2000000+">Ca hát</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">Tìm kiếm</label>
-                <input type="text" class="filter-input" placeholder="Tên phòng..." onkeyup="searchRooms(this.value)">
-            </div>
-        </div>
+        </form>
+
+
+
+
 
         <!-- Data Table -->
         <div class="table-responsive">

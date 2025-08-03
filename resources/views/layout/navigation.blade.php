@@ -89,7 +89,7 @@
 <header class="bk-header">
   <div class="bk-header__bar">
     <div class="bk-header__left">
-      <a class="bk-header__logo" href="{{ route('home') }}">Hotel <span>Booking</span></a>
+      <a class="bk-header__logo" href="{{ route('index') }}">Hotel <span>Booking</span></a>
     </div>
 
     <nav class="bk-header__nav">
@@ -100,7 +100,7 @@
       <li><a href="{{ route('booking.history', ['userId' => auth()->id()]) }}" class="bk-header__nav-link">Hóa đơn của
         tôi</a></li>
     @endauth
-        <li><a href="#" class="bk-header__nav-link">Hỗ trợ</a></li>
+        <li><a href="{{ route('contact.create') }}" class="bk-header__nav-link">Liên hệ</a></li>
         <li><a href="{{ route('all_rooms') }}" class="bk-header__nav-link">Chỗ nghỉ của Quý vị</a></li>
       </ul>
     </nav>
@@ -165,7 +165,7 @@
       <li><a href="{{ route('user.services.index') }}"><i class="fa-solid fa-concierge-bell"></i> Dịch vụ</a></li>
       <li><a href="#"><i class="fa-solid fa-gift"></i> Ưu đãi</a></li>
       <li><a href="#"><i class="fa-solid fa-suitcase-rolling"></i> Hóa đơn của tôi</a></li>
-      <li><a href="#"><i class="fa-solid fa-headset"></i> Hỗ trợ</a></li>
+      <li><a href="{{ route('contact.create') }}"><i class="fa-solid fa-headset"></i> Liên hệ</a></li>
       <li><a href="#"><i class="fa-solid fa-hotel"></i> Chỗ nghỉ của Tôi</a></li>
       @guest
       <li><a href="{{ route('register') }}"><i class="fa-solid fa-user-plus"></i> Đăng ký</a></li>

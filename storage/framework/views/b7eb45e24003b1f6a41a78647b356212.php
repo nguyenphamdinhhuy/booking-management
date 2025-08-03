@@ -195,7 +195,7 @@
 
         
         <div class="back-to-home">
-            <a href="<?php echo e(route('home')); ?>" class="back-btn">
+            <a href="<?php echo e(route('index')); ?>" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Quay lại trang chủ
             </a>

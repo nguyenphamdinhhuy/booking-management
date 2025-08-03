@@ -10,10 +10,24 @@ class serviceCategory_cotroller extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = ServiceCategory::all(); // lấy tất cả danh mục
-        return view('admin.service.service_categories', compact('categories'));
+        $query = ServiceCategory::query();
+        // loc theo loai
+        if ($request->filled('id')) {
+            $query->where('id', $request->id);
+        }
+        // loc trang thai
+        if ($request->filled('is_available')) {
+            $query->where('is_available', $request->is_available);
+        }
+        // tim kiem 
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+        $categories = $query->paginate(10);
+        $service_Category = ServiceCategory::all();
+        return view('admin.service.service_categories', compact('categories', 'service_Category'));
     }
 
     /**
