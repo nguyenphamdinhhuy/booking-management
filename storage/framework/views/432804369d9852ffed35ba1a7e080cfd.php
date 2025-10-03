@@ -137,7 +137,7 @@ unset($__errorArgs, $__bag); ?>
         </div>
 
         <button type="submit" class="btn-submit">Đăng ký</button>
-
+    
         <div class="form-footer">
             Bạn đã có tài khoản? <a href="<?php echo e(route('login')); ?>">Đăng nhập</a>
         </div>

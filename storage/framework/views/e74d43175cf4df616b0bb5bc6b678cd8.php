@@ -24,7 +24,7 @@
                             <h3>Chưa có phòng yêu thích nào</h3>
                             <p>Bạn chưa thêm phòng nào vào danh sách yêu thích. Hãy khám phá và lưu lại những phòng bạn thích!
                             </p>
-                            <a href="<?php echo e(route('home')); ?>" class="btn btn-primary">
+                            <a href="<?php echo e(route('index')); ?>" class="btn btn-primary">
                                 <i class="fas fa-search"></i> Khám phá phòng
                             </a>
                         </div>

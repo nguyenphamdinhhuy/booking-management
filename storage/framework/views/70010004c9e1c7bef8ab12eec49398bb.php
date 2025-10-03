@@ -70,19 +70,28 @@
                     <td><strong><?php echo e($booking->nights); ?> đêm</strong></td>
                     <td><strong style="color: #e74c3c;"><?php echo e($booking->formatted_total_price); ?></strong></td>
                     <td>
-                        <?php if($booking->status_text == 'pending'): ?>
-                        <span class="status-badge" style="background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-                            <i class="fas fa-hourglass-half"></i> Chờ xác nhận
-                        </span>
-                        <?php elseif($booking->status_text == 'confirmed'): ?>
+                        
+                        <?php if($booking->status == 0): ?>
                         <span class="status-badge" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-                            <i class="fas fa-clock"></i> Chờ trả phòng
+                            <i class="fas fa-credit-card"></i> Chờ thanh toán
                         </span>
-                        <?php elseif($booking->status_text == 'completed'): ?>
+                        <?php elseif($booking->status == 1): ?>
+                        <span class="status-badge" style="background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            <i class="fas fa-hourglass-half"></i> Chờ xác nhận đơn
+                        </span>
+                        <?php elseif($booking->status == 2): ?>
+                        <span class="status-badge" style="background: #fff3e0; color: #ef6c00; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            <i class="fas fa-key"></i> Chờ nhận phòng
+                        </span>
+                        <?php elseif($booking->status == 3): ?>
+                        <span class="status-badge" style="background: #fce4ec; color: #c2185b; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            <i class="fas fa-clock"></i> Chờ xác nhận trả phòng
+                        </span>
+                        <?php elseif($booking->status == 4): ?>
                         <span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                             <i class="fas fa-check-circle"></i> Hoàn tất
                         </span>
-                        <?php elseif($booking->status_text == 'cancelled'): ?>
+                        <?php else: ?>
                         <span class="status-badge" style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                             <i class="fas fa-times-circle"></i> Đã hủy
                         </span>
@@ -96,29 +105,70 @@
                                 <i class="fas fa-eye"></i>
                             </a>
 
-                            <?php if($booking->status_text == 'pending'): ?>
+                            
+                            <?php if($booking->status == 1): ?>
                             <form method="POST" action="<?php echo e(route('admin.bookings.confirm', $booking->b_id)); ?>"
                                 style="display: inline-block;">
                                 <?php echo csrf_field(); ?>
                                 <button type="submit" class="btn btn-info btn-sm"
                                     title="Xác nhận đơn đặt phòng"
-                                    onclick="return confirm('Xác nhận đơn đặt phòng này?')">
+                                    onclick="return confirm('Xác nhận đơn đặt phòng này? Phòng sẽ được đánh dấu là đã được đặt.')">
                                     <i class="fas fa-check"></i> Xác nhận đơn
                                 </button>
                             </form>
-                            <?php elseif($booking->status_text == 'confirmed'): ?>
+
+                            <!-- Nút hủy đặt phòng -->
+                            <a href="<?php echo e(route('admin.bookings.cancel.form', $booking->b_id)); ?>"
+                                class="btn btn-danger btn-sm" title="Hủy đặt phòng">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+
+                            
+                            <?php elseif($booking->status == 2): ?>
+                            <button class="btn btn-warning btn-sm" disabled title="Chờ khách xác nhận nhận phòng">
+                                <i class="fas fa-key"></i> Chờ nhận phòng
+                            </button>
+
+                            <!-- Nút hủy đặt phòng -->
+                            <a href="<?php echo e(route('admin.bookings.cancel.form', $booking->b_id)); ?>"
+                                class="btn btn-danger btn-sm" title="Hủy đặt phòng">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+
+                            
+                            <?php elseif($booking->status == 3): ?>
                             <form method="POST" action="<?php echo e(route('admin.bookings.confirm.checkout', $booking->b_id)); ?>"
                                 style="display: inline-block;">
                                 <?php echo csrf_field(); ?>
                                 <button type="submit" class="btn btn-success btn-sm"
-                                    title="Xác nhận trả phòng thành công"
-                                    onclick="return confirm('Xác nhận khách hàng đã trả phòng thành công?')">
-                                    <i class="fas fa-check"></i> Xác nhận trả phòng
+                                    title="Xác nhận khách đã trả phòng thành công"
+                                    onclick="return confirm('Xác nhận khách hàng đã trả phòng thành công? Phòng sẽ được cập nhật trạng thái còn trống.')">
+                                    <i class="fas fa-check-double"></i> Xác nhận trả phòng
                                 </button>
                             </form>
-                            <?php elseif($booking->status_text == 'completed'): ?>
+
+                            <!-- Nút hủy đặt phòng -->
+                            <a href="<?php echo e(route('admin.bookings.cancel.form', $booking->b_id)); ?>"
+                                class="btn btn-danger btn-sm" title="Hủy đặt phòng">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+
+                            
+                            <?php elseif($booking->status == 4): ?>
                             <button class="btn btn-secondary btn-sm" disabled title="Đã hoàn tất">
-                                <i class="fas fa-check-double"></i> Đã hoàn tất
+                                <i class="fas fa-check-circle"></i> Đã hoàn tất
+                            </button>
+
+                            
+                            <?php elseif($booking->status == 0): ?>
+                            <button class="btn btn-outline-warning btn-sm" disabled title="Chờ khách thanh toán">
+                                <i class="fas fa-credit-card"></i> Chờ thanh toán
+                            </button>
+
+                            
+                            <?php else: ?>
+                            <button class="btn btn-outline-secondary btn-sm" disabled title="Đã hủy">
+                                <i class="fas fa-times-circle"></i> Đã hủy
                             </button>
                             <?php endif; ?>
                         </div>

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\admin\service;
+
 use App\Models\ServiceCategory;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -10,10 +11,24 @@ class serviceCategory_cotroller extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = ServiceCategory::all(); // lấy tất cả danh mục
-        return view('admin.service.service_categories', compact('categories'));
+        $query = ServiceCategory::whereNull('deleted_at');
+        // loc theo loai
+        if ($request->filled('id')) {
+            $query->where('id', $request->id);
+        }
+        // loc trang thai
+        if ($request->filled('is_available')) {
+            $query->where('is_available', $request->is_available);
+        }
+        // tim kiem 
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+        $categories = $query->paginate(10)->withQueryString();
+        $service_Category = ServiceCategory::whereNull('deleted_at')->orderBy('name')->get();
+        return view('admin.service.service_categories', compact('categories', 'service_Category'));
     }
 
     /**
@@ -34,6 +49,7 @@ class serviceCategory_cotroller extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'is_available' => 'required|boolean',
         ]);
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -47,10 +63,10 @@ class serviceCategory_cotroller extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'image' => $imagePath,
+            'is_available' => $request->is_available,
         ]);
 
         return redirect()->route('service-categories.index')->with('success', 'Thêm danh mục thành công!');
-
     }
 
     /**
@@ -70,6 +86,7 @@ class serviceCategory_cotroller extends Controller
         return view('admin.service.edit_serviceCategory', compact('category'));
     }
 
+
     /**
      * Update the specified resource in storage.
      */
@@ -79,20 +96,22 @@ class serviceCategory_cotroller extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:ipg,jpeg,png|max:2048',
+            'is_available' => 'required|boolean',
         ]);
 
         $category = ServiceCategory::findOrFail($id);
         $imagePath = $category->image;
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $fileName = time() . '_' .$file->getClientOriginalName();
-            $file->move(public_path('upload/services'),$fileName);
-            $imagePath = 'upload/services/' .$fileName;
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('upload/services'), $fileName);
+            $imagePath = 'upload/services/' . $fileName;
         }
         $category->update([
             'name' => $request->name,
             'description' => $request->description,
             'image' => $imagePath,
+            'is_available' => $request->is_available,
         ]);
 
         return redirect()->route('service-categories.index')->with('success', 'Cập nhật thành công!');
@@ -104,7 +123,9 @@ class serviceCategory_cotroller extends Controller
     public function destroy(string $id)
     {
         $category = ServiceCategory::findOrFail($id);
-        $category->delete();
+        $category->update(
+            ['deleted_at' => now()]
+        );
 
         return redirect()->route('service-categories.index')->with('success', 'Xóa danh mục thành công!');
     }

@@ -103,31 +103,72 @@
                 </select>
             </div>
 
-            <!-- Current Image & New Image Upload -->
+            <!-- Images Management -->
             <div class="form-group full-width">
-                <label for="image" class="form-label">
-                    <i class="fas fa-image"></i>
-                    Hình ảnh phòng
+                <label class="form-label">
+                    <i class="fas fa-images"></i>
+                    Quản lý hình ảnh phòng
                 </label>
 
-                <!-- Hiển thị ảnh hiện tại -->
-                <?php if($room->images): ?>
-                <div class="current-image" style="margin-bottom: 15px;">
-                    <p style="margin-bottom: 10px; font-weight: 500;">Ảnh hiện tại:</p>
-                    <img src="<?php echo e(asset($room->images)); ?>" alt="<?php echo e($room->name); ?>"
-                        style="width: 200px; height: 150px; object-fit: cover; border-radius: 8px; border: 2px solid #e0e0e0;">
+                <!-- Current Images -->
+                <?php if($roomImages->count() > 0): ?>
+                <div class="current-images-section" style="margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px; color: #333;">Ảnh hiện tại:</h4>
+                    <div class="images-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <?php $__currentLoopData = $roomImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="image-item" style="position: relative; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                            <img src="<?php echo e(asset($image->image_path)); ?>" alt="Room Image" 
+                                style="width: 100%; height: 150px; object-fit: cover;">
+                            
+                            <!-- Main Image Indicator -->
+                            <?php if($room->images == $image->image_path): ?>
+                            <div class="main-image-badge" style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                                Ảnh chính
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Image Controls -->
+                            <div class="image-controls" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); padding: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                <!-- Set as Main Image -->
+                                <?php if($room->images != $image->image_path): ?>
+                                <button type="button" class="btn-set-main" data-image-id="<?php echo e($image->id); ?>" 
+                                    style="background: #007bff; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                                    Đặt làm ảnh chính
+                                </button>
+                                <?php else: ?>
+                                <span style="color: #28a745; font-size: 11px; font-weight: bold;">Ảnh chính</span>
+                                <?php endif; ?>
+                                
+                                <!-- Delete Image -->
+                                <button type="button" class="btn-delete-image" data-image-id="<?php echo e($image->id); ?>"
+                                    style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </div>
                 </div>
                 <?php endif; ?>
 
-                <div class="file-upload-area">
-                    <input type="file" id="image" name="image" class="file-input" accept="image/*">
-                    <div class="file-upload-content">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p><?php echo e($room->images ? 'Chọn ảnh mới để thay thế' : 'Kéo thả hình ảnh vào đây hoặc chọn file'); ?></p>
-                        <p class="file-info">Hỗ trợ: JPG, PNG, GIF (Tối đa 5MB)</p>
+                <!-- Upload New Images -->
+                <div class="upload-new-images">
+                    <h4 style="margin-bottom: 15px; color: #333;">Thêm ảnh mới:</h4>
+                    <div class="file-upload-area" style="border: 2px dashed #ccc; border-radius: 8px; padding: 20px; text-align: center; background: #f9f9f9;">
+                        <input type="file" id="images" name="images[]" class="file-input" accept="image/*" multiple 
+                            style="display: none;">
+                        <div class="file-upload-content" onclick="document.getElementById('images').click()" style="cursor: pointer;">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #666; margin-bottom: 10px;"></i>
+                            <p style="margin: 10px 0; font-size: 16px; color: #666;">Chọn nhiều ảnh để upload</p>
+                            <p class="file-info" style="font-size: 14px; color: #999;">Hỗ trợ: JPG, PNG, GIF (Tối đa 5MB mỗi ảnh)</p>
+                        </div>
                     </div>
+                    <div id="newImagesPreview" class="images-preview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;"></div>
                 </div>
-                <div id="imagePreview" class="image-preview"></div>
+
+                <!-- Hidden inputs for form data -->
+                <input type="hidden" id="deleteImages" name="delete_images" value="">
+                <input type="hidden" id="mainImage" name="main_image" value="">
             </div>
 
             <!-- Description -->
@@ -158,6 +199,209 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let imagesToDelete = [];
+    let newMainImageId = null;
+
+    // Handle delete image
+    document.querySelectorAll('.btn-delete-image').forEach(button => {
+        button.addEventListener('click', function() {
+            const imageId = this.getAttribute('data-image-id');
+            const imageItem = this.closest('.image-item');
+            
+            if (confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                imagesToDelete.push(imageId);
+                imageItem.style.display = 'none';
+                
+                // Update hidden input
+                document.getElementById('deleteImages').value = imagesToDelete.join(',');
+            }
+        });
+    });
+
+    // Handle set main image
+    document.querySelectorAll('.btn-set-main').forEach(button => {
+        button.addEventListener('click', function() {
+            const imageId = this.getAttribute('data-image-id');
+            
+            // Remove all main image badges
+            document.querySelectorAll('.main-image-badge').forEach(badge => {
+                badge.remove();
+            });
+            
+            // Remove all "Ảnh chính" text
+            document.querySelectorAll('.image-controls span').forEach(span => {
+                if (span.textContent.includes('Ảnh chính')) {
+                    span.remove();
+                }
+            });
+            
+            // Add main image badge to selected image
+            const imageItem = this.closest('.image-item');
+            const badge = document.createElement('div');
+            badge.className = 'main-image-badge';
+            badge.style.cssText = 'position: absolute; top: 5px; left: 5px; background: #28a745; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;';
+            badge.textContent = 'Ảnh chính';
+            imageItem.appendChild(badge);
+            
+            // Replace button with text
+            this.outerHTML = '<span style="color: #28a745; font-size: 11px; font-weight: bold;">Ảnh chính</span>';
+            
+            // Update all other buttons
+            document.querySelectorAll('.btn-set-main').forEach(otherBtn => {
+                otherBtn.style.display = 'inline-block';
+            });
+            
+            // Update hidden input
+            newMainImageId = imageId;
+            document.getElementById('mainImage').value = imageId;
+        });
+    });
+
+    // Handle new images preview
+    document.getElementById('images').addEventListener('change', function() {
+        const files = this.files;
+        const preview = document.getElementById('newImagesPreview');
+        preview.innerHTML = '';
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.style.cssText = 'position: relative; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden;';
+                div.innerHTML = `
+                    <img src="${e.target.result}" style="width: 100%; height: 120px; object-fit: cover;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 12px; text-align: center;">
+                        ${file.name}
+                    </div>
+                `;
+                preview.appendChild(div);
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Form reset
+    document.querySelector('button[type="reset"]').addEventListener('click', function() {
+        imagesToDelete = [];
+        newMainImageId = null;
+        document.getElementById('deleteImages').value = '';
+        document.getElementById('mainImage').value = '';
+        document.getElementById('newImagesPreview').innerHTML = '';
+        
+        // Restore all hidden images
+        document.querySelectorAll('.image-item').forEach(item => {
+            item.style.display = 'block';
+        });
+    });
+});
+</script>
+
+<style>
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.required {
+    color: #dc3545;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #007bff;
+    border: 2px solid #007bff;
+}
+
+.btn-outline:hover {
+    background: #007bff;
+    color: white;
+}
+
+.page-title {
+    color: #333;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.content-section {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+</style>
 
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('admin.layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\F-poly\graduation_project\booking_laravel_project\booking_app\resources\views/admin/rooms/edit_room.blade.php ENDPATH**/ ?>

@@ -90,7 +90,7 @@
 <header class="bk-header">
   <div class="bk-header__bar">
     <div class="bk-header__left">
-      <a class="bk-header__logo" href="<?php echo e(route('home')); ?>">Hotel <span>Booking</span></a>
+      <a class="bk-header__logo" href="<?php echo e(route('index')); ?>">Hotel <span>Booking</span></a>
     </div>
 
     <nav class="bk-header__nav">

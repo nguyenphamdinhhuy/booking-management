@@ -8,7 +8,7 @@
     <nav class="flex mb-8" aria-label="Breadcrumb">
         <ol class="inline-flexitems-center space-x-1 md:space-x-3">
             <li class="inline-flex items-center">
-                <a href="<?php echo e(route('home')); ?>"
+                <a href="<?php echo e(route('index')); ?>"
                     class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
                     <i class="fas fa-home mr-2"></i>
                     Trang chủ

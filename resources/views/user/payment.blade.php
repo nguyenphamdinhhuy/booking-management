@@ -2,7 +2,7 @@
 
 @section('content')
 
-{{-- Hiển thị thông báo --}}
+{{-- Thông báo --}}
 @if(session('success'))
 <div class="custom-alert custom-alert-success" id="alert-success">
     <i class="fas fa-check-circle"></i> {{ session('success') }}
@@ -15,7 +15,7 @@
 </div>
 @endif
 
-{{-- Hiển thị lỗi validation --}}
+{{-- Lỗi validation --}}
 @if($errors->any())
 <div class="custom-alert custom-alert-error" id="alert-validate">
     <i class="fas fa-exclamation-triangle"></i>
@@ -26,6 +26,7 @@
     </ul>
 </div>
 @endif
+
 <div class="payment">
     <!-- Header -->
     <div class="payment-header">
@@ -49,7 +50,7 @@
         <div class="step-indicator">
             <div class="step completed">
                 <i class="fas fa-check-circle"></i>
-                <span>Chọn phòng</span>
+                <span>Chọn loại phòng</span>
             </div>
             <div class="step completed">
                 <i class="fas fa-check-circle"></i>
@@ -79,56 +80,38 @@
                 </div>
 
                 <div class="payment-methods">
-                    <!-- VNPay Option -->
-                    <div class="payment-method selected" onclick="selectPaymentMethod(this, 'vnpay')">
+                    <!-- Thẻ card là LABEL, trỏ tới radio ở trong form -->
+                    <label class="payment-method selected" for="pm_vnpay" data-method="vnpay">
                         <div class="method-icon vnpay-icon">
                             <i class="fas fa-credit-card"></i>
                         </div>
                         <div class="method-info">
                             <h3>Thanh toán VNPay</h3>
-                            <p>Thanh toán nhanh chóng và bảo mật qua VNPay</p>
+                            <p>Thanh toán online nhanh chóng và bảo mật</p>
                             <div class="supported-banks">
                                 <small>Hỗ trợ: Visa, Mastercard, ATM nội địa</small>
                             </div>
                         </div>
                         <div class="method-radio">
-                            <i class="fas fa-check-circle" style="color: #003580; font-size: 20px;"></i>
+                            <i class="fas fa-check-circle" style="color:#003580;font-size:20px;"></i>
                         </div>
-                    </div>
+                    </label>
 
-                    <!-- MoMo Option -->
-                    <div class="payment-method" onclick="selectPaymentMethod(this, 'momo')">
-                        <div class="method-icon momo-icon">
-                            <i class="fas fa-mobile-alt"></i>
+                    <label class="payment-method" for="pm_cash" data-method="cash">
+                        <div class="method-icon cash-icon">
+                            <i class="fas fa-money-bill-wave"></i>
                         </div>
                         <div class="method-info">
-                            <h3>Ví điện tử MoMo</h3>
-                            <p>Thanh toán nhanh chóng với ví MoMo</p>
+                            <h3>Thanh toán tiền mặt</h3>
+                            <p>Thanh toán tại khách sạn khi nhận phòng</p>
                             <div class="supported-banks">
-                                <small>Quét QR hoặc liên kết ví MoMo</small>
+                                <small>Đặt trước, thanh toán khi check-in</small>
                             </div>
                         </div>
                         <div class="method-radio">
-                            <i class="far fa-circle" style="color: #ccc; font-size: 20px;"></i>
+                            <i class="far fa-circle" style="color:#ccc;font-size:20px;"></i>
                         </div>
-                    </div>
-
-                    <!-- Bank Transfer Option -->
-                    <div class="payment-method" onclick="selectPaymentMethod(this, 'bank')">
-                        <div class="method-icon bank-icon">
-                            <i class="fas fa-university"></i>
-                        </div>
-                        <div class="method-info">
-                            <h3>Chuyển khoản ngân hàng</h3>
-                            <p>Chuyển khoản trực tiếp qua ngân hàng</p>
-                            <div class="supported-banks">
-                                <small>Vietcombank, BIDV, VietinBank, Techcombank...</small>
-                            </div>
-                        </div>
-                        <div class="method-radio">
-                            <i class="far fa-circle" style="color: #ccc; font-size: 20px;"></i>
-                        </div>
-                    </div>
+                    </label>
                 </div>
             </div>
 
@@ -139,13 +122,10 @@
                     </div>
                     <span>Thông tin thanh toán</span>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">ID khách hàng</label>
-                    <input type="text" class="form-input" value="{{ $user->id ?? '' }}" readonly>
-                </div>
+
                 <div class="form-group">
                     <label class="form-label">Họ tên</label>
-                    <input type="text" class="form-input" value="{{ $user->name ?? '' }}" readonly>
+                    <input type="text" class="form-input" value="{{ $user->name ?? '' }}">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Số điện thoại</label>
@@ -153,30 +133,50 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Email xác nhận</label>
-                    <input type="email" class="form-input" value="{{ $user->email ?? '' }}" readonly>
+                    <input type="email" class="form-input" value="{{ $user->email ?? '' }}">
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: end;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;">
                     <div class="form-group">
                         <label class="form-label">Ngày check-in</label>
-                        <input type="date" class="detail-form-input" id="checkin-date" value="{{ $checkin ?? '' }}" required readonly>
+                        <input type="date" class="detail-form-input" id="checkin-date" value="{{ $checkin ?? '' }}" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Ngày check-out</label>
-                        <input type="date" class="detail-form-input" id="checkout-date" value="{{ $checkout ?? '' }}" required readonly>
+                        <input type="date" class="detail-form-input" id="checkout-date" value="{{ $checkout ?? '' }}" required>
                     </div>
                 </div>
             </div>
 
             <form id="payment-form" action="{{ route('process.payment') }}" method="POST">
                 @csrf
-                <input type="hidden" name="r_id" value="{{ $room->r_id }}">
+                {{-- CHỈ 2 radio ở TRONG form --}}
+                <input type="radio" name="payment_method" id="pm_vnpay" value="vnpay" class="hidden" checked>
+                <input type="radio" name="payment_method" id="pm_cash"  value="cash"  class="hidden">
+
+                <input type="hidden" name="rt_id" value="{{ $roomType->rt_id ?? '' }}">
                 <input type="hidden" name="checkin" value="{{ $checkin }}">
                 <input type="hidden" name="checkout" value="{{ $checkout }}">
                 <input type="hidden" name="guests" value="{{ $guests }}">
-                <input type="hidden" name="total_price" value="{{ $total_price }}">
+                {{-- Tổng tiền gửi đi = final_total (đã gồm dịch vụ & giảm giá) --}}
+                <input type="hidden" name="total_price" value="{{ (int)($final_total ?? 0) }}">
                 <input type="hidden" name="discount_code" value="{{ $discount_code }}">
-                <input type="hidden" name="discount_amount" value="{{ $discount_amount }}">
-                <input type="hidden" name="payment_method" id="payment_method" value="vnpay">
+                <input type="hidden" name="discount_amount" value="{{ (int)($discount_amount ?? 0) }}">
+
+                {{-- (Tuỳ chọn) Nếu bạn có truyền services[...] và services_total từ trang trước, đính kèm lại để server tạo booking_services_details --}}
+                @php
+                    // $selectedServices có thể được controller cung cấp (nếu bạn muốn giữ nguyên)
+                    $selectedServices = $selectedServices ?? request('services', []);
+                    $services_total = (int)($services_total ?? 0);
+                @endphp
+                <input type="hidden" name="services_total" value="{{ $services_total }}">
+                @if(!empty($selectedServices))
+                    @foreach($selectedServices as $sid => $svc)
+                        <input type="hidden" name="services[{{ (int)($svc['s_id'] ?? $sid) }}][s_id]" value="{{ (int)($svc['s_id'] ?? $sid) }}">
+                        <input type="hidden" name="services[{{ (int)($svc['s_id'] ?? $sid) }}][quantity]" value="{{ (int)($svc['quantity'] ?? 0) }}">
+                        <input type="hidden" name="services[{{ (int)($svc['s_id'] ?? $sid) }}][unit_price]" value="{{ (int)($svc['unit_price'] ?? 0) }}">
+                        <input type="hidden" name="services[{{ (int)($svc['s_id'] ?? $sid) }}][pricing_model]" value="{{ (int)($svc['pricing_model'] ?? 0) }}">
+                    @endforeach
+                @endif
 
                 <button type="submit" class="checkout-button" id="checkout-btn">
                     <i class="fas fa-shield-alt"></i>
@@ -198,328 +198,246 @@
             <div class="booking-item">
                 <div class="item-header">
                     <div class="item-icon">
-                        <i class="fas fa-bed"></i>
+                        <i class="fas fa-home"></i>
                     </div>
                     <div class="item-info">
-                        <h4>{{ $room->name ?? 'Tên phòng' }}</h4>
-                        <p>{{ $room->description ?? 'Mô tả phòng' }}</p>
+                        <h4>{{ $roomType->type_name ?? 'Tên loại phòng' }}</h4>
+                        <p>{{ $roomType->description ?? 'Mô tả loại phòng' }}</p>
+                        <div class="room-specs">
+                            @if($roomType)
+                                <span class="spec-item"><i class="fas fa-users"></i> Tối đa {{ $roomType->max_guests }} người</span>
+                                <span class="spec-item"><i class="fas fa-bed"></i> {{ $roomType->number_beds }} giường</span>
+                                <span class="spec-item"><i class="fas fa-expand-arrows-alt"></i> {{ $roomType->room_size }}</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
                 <div class="item-details" id="order-item-details">
                     <p><i class="fas fa-calendar-alt"></i> <span id="order-checkin">{{ $checkin ?? '...' }}</span> - <span id="order-checkout">{{ $checkout ?? '...' }}</span></p>
-                    <p><i class="fas fa-moon"></i> <span id="order-nights">{{ isset($checkin, $checkout) ? ((strtotime($checkout) - strtotime($checkin))/86400) : '...' }}</span> đêm</p>
+                    <p><i class="fas fa-moon"></i> <span id="order-nights">{{ (int)($nights ?? 0) }}</span> đêm</p>
                     <p><i class="fas fa-users"></i> {{ $guests ?? '...' }} người lớn</p>
                 </div>
             </div>
 
             @php
-            // Tính số đêm
-            $nights = 0;
-            if (!empty($checkin) && !empty($checkout)) {
-            $nights = (strtotime($checkout) - strtotime($checkin)) / 86400;
-            if ($nights < 1) $nights=1;
-                }
-                // Giá phòng/đêm
-                $pricePerNight=$room->price_per_night ?? 0;
-                // Tổng tiền
-                $total = $nights * $pricePerNight;
-                $discount_percent = $discount_percent ?? 0;
-                $discount_amount = $discount_amount ?? 0;
-                $final_total = $total - $discount_amount;
-                @endphp
+                $nightsVal      = (int)($nights ?? 0);
+                $roomTotalVal   = (int)($roomTotal ?? 0);
+                $discountAmount = (int)($discount_amount ?? 0);
+                $servicesTotal  = (int)($services_total ?? 0);
+                $finalTotal     = max(0, $roomTotalVal - $discountAmount + $servicesTotal);
+                $pricePerNight  = (int)($roomType->base_price ?? 0);
+            @endphp
 
-                <div class="price-breakdown">
-                    <div class="price-row">
-                        <span>Giá phòng (<span id="order-nights2">{{ $nights }}</span> đêm)</span>
-                        <span id="order-room-price">{{ number_format($pricePerNight * $nights, 0, ',', '.') }}₫</span>
-                    </div>
-                    @if($discount_amount > 0)
-                    <div class="price-row discount" style="color: #e53935; font-weight: bold;">
-                        <span>Giảm giá ({{ $discount_percent }}%)</span>
-                        <span>-{{ number_format($discount_amount, 0, ',', '.') }}₫</span>
-                    </div>
-                    @endif
-                    <div class="price-row total" style="font-size: 18px; font-weight: bold;">
-                        <span>Tổng cộng</span>
-                        <span id="order-total">{{ number_format($final_total, 0, ',', '.') }}₫</span>
-                    </div>
+            <div class="price-breakdown">
+                <div class="price-row">
+                    <span>Giá loại phòng (<span id="order-nights2">{{ $nightsVal }}</span> đêm)</span>
+                    <span id="order-room-price">{{ number_format($roomTotalVal, 0, ',', '.') }}₫</span>
                 </div>
 
-                @if(request('discount_code') && !$voucher)
-                <div style="color: #e53935; font-size: 15px; margin: 10px 0; font-weight: bold;">
-                    Mã giảm giá không hợp lệ hoặc đã hết hạn!
-                </div>
+                @if($servicesTotal > 0)
+                    <div class="price-row services-total">
+                        <span>Dịch vụ kèm</span>
+                        <span id="order-services-price">{{ number_format($servicesTotal, 0, ',', '.') }}₫</span>
+                    </div>
                 @endif
 
-                <div class="payment-security-info">
-                    <div class="security-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Bảo mật 256-bit SSL</span>
+                @if($discountAmount > 0)
+                    <div class="price-row discount">
+                        <span>Giảm giá ({{ (int)($discount_percent ?? 0) }}%)</span>
+                        <span>-{{ number_format($discountAmount, 0, ',', '.') }}₫</span>
                     </div>
-                    <div class="security-item">
-                        <i class="fas fa-lock"></i>
-                        <span>Thông tin được mã hóa</span>
-                    </div>
-                    <div class="security-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Thanh toán an toàn</span>
-                    </div>
+                @endif
+
+                <div class="price-row total">
+                    <span>Tổng cộng</span>
+                    <span id="order-total">{{ number_format($finalTotal, 0, ',', '.') }}₫</span>
                 </div>
+            </div>
 
-                <div style="margin-top: 20px; padding: 16px; background: #f0f6ff; border-radius: 8px; font-size: 14px; color: #666; border-left: 4px solid #003580;">
-                    <i class="fas fa-info-circle" style="color: #003580;"></i>
-                    <strong>Lưu ý:</strong> Bạn sẽ không bị tính phí cho đến khi xác nhận đặt phòng thành công.
+            @if(request('discount_code') && !$voucher)
+                <div class="warning-inline">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Mã giảm giá không hợp lệ hoặc đã hết hạn!
                 </div>
+            @endif
 
+            <div class="payment-security-info">
+                <div class="security-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Bảo mật 256-bit SSL</span>
+                </div>
+                <div class="security-item">
+                    <i class="fas fa-lock"></i>
+                    <span>Thông tin được mã hóa</span>
+                </div>
+                <div class="security-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Thanh toán an toàn</span>
+                </div>
+            </div>
 
+            <div class="note-box">
+                <i class="fas fa-info-circle"></i>
+                <strong>Lưu ý:</strong> Bạn sẽ được admin assign phòng cụ thể sau khi hoàn tất đặt loại phòng.
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-    .payment-methods {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+    :root{
+        --brand:#003580;
+        --brand-d:#002147;
+        --brand-mid:#1e3c72;
+        --accent:#2a5298;
+        --ok:#1a7f37;
+        --bg:#f6f8ff;
+        --card:#ffffff;
+        --border:#e5eaf5;
+        --muted:#66728c;
+        --danger:#d7263d;
+        --shadow:0 10px 30px rgba(0,53,128,.08);
     }
-
-    .payment-method {
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        padding: 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        background: white;
-    }
-
-    .payment-method:hover {
-        border-color: #003580;
-        box-shadow: 0 4px 12px rgba(0, 53, 128, 0.1);
-    }
-
-    .payment-method.selected {
-        border-color: #003580;
-        background: #f8fafe;
-        box-shadow: 0 4px 12px rgba(0, 53, 128, 0.15);
-    }
-
-    .method-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .vnpay-icon {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    }
-
-    .momo-icon {
-        background: linear-gradient(135deg, #a21caf 0%, #ec4899 100%);
-    }
-
-    .bank-icon {
-        background: linear-gradient(135deg, #047857 0%, #10b981 100%);
-    }
-
-    .method-info {
-        flex: 1;
-    }
-
-    .method-info h3 {
-        margin: 0 0 8px 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .method-info p {
-        margin: 0 0 4px 0;
-        color: #666;
-        font-size: 14px;
-    }
-
-    .supported-banks {
-        margin-top: 4px;
-    }
-
-    .supported-banks small {
-        color: #888;
-        font-size: 12px;
-    }
-
-    .payment-security-info {
-        margin-top: 20px;
-        padding: 16px;
-        background: #f8fafe;
-        border-radius: 8px;
-        border: 1px solid #e3f2fd;
-    }
-
-    .security-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-        font-size: 14px;
-        color: #666;
-    }
-
-    .security-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .security-item i {
-        color: #003580;
-        width: 16px;
-    }
-
-    .checkout-button {
-        width: 100%;
-        padding: 18px 24px;
-        background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 24px;
-    }
-
-    .checkout-button:hover {
-        background: linear-gradient(135deg, #002147 0%, #003d82 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 53, 128, 0.3);
-    }
-
-    .checkout-button:active {
-        transform: translateY(0);
-    }
-
-    .custom-alert {
-        padding: 14px 20px;
-        border-radius: 8px;
-        margin-bottom: 24px;
-        font-size: 16px;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        animation: fadeInDown 0.5s;
-        position: relative;
-        background: #eaf4ff;
-        color: #1863b8;
-        border: 1.5px solid #b3d8fd;
-    }
-
-    .custom-alert-success {
-        background: #eafaf1;
-        color: #1a7f37;
-        border-color: #b7e4c7;
-    }
-
-    .custom-alert-error {
-        background: #fff0f0;
-        color: #d7263d;
-        border-color: #ffd6d6;
-    }
-
-    .custom-alert i {
-        font-size: 20px;
-        margin-right: 6px;
-    }
-
-    @keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .hidden{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+    .payment{max-width:1200px;margin:0 auto;padding:24px}
+    .payment-header{background:linear-gradient(120deg, #f8fbff, #eef4ff);border:1px solid var(--border);border-radius:18px;padding:20px 24px;margin-bottom:22px;box-shadow:var(--shadow)}
+    .header-top{display:flex;align-items:center;justify-content:space-between}
+    .logo-section{display:flex;align-items:center;gap:12px}
+    .logo-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand-mid),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 18px rgba(0,53,128,.25)}
+    .logo-text{font-weight:800;font-size:20px;color:var(--brand)}
+    .security-badge{display:flex;align-items:center;gap:8px;color:var(--muted);font-weight:600}
+    .progress-bar{height:6px;background:#eaf1ff;border-radius:999px;margin:16px 0 10px;overflow:hidden}
+    .progress-fill{height:100%;width:75%;background:linear-gradient(90deg,var(--brand-mid),var(--accent));border-radius:999px}
+    .step-indicator{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .step{display:flex;align-items:center;gap:8px;padding:10px;border:1px dashed #dbe5ff;border-radius:10px;color:var(--muted);background:#fafcff}
+    .step.active,.step.completed{border-style:solid;border-color:#cfe0ff;background:#f5f9ff;color:var(--brand)}
+    .payment-content{display:grid;grid-template-columns:1.3fr .8fr;gap:24px}
+    .payment-form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+    .form-section{border:1px solid #edf2ff;border-radius:14px;padding:16px 16px 8px;margin-bottom:16px;background:#fbfdff}
+    .section-title{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .section-icon{width:36px;height:36px;border-radius:10px;background:#eaf1ff;display:flex;align-items:center;justify-content:center;color:var(--brand)}
+    .section-title span{font-weight:800;color:#1f2b48}
+    .payment-methods{display:flex;flex-direction:column;gap:12px}
+    .payment-method{border:2px solid #e0e6f5;border-radius:14px;padding:18px;cursor:pointer;transition:all .25s ease;display:flex;align-items:center;gap:16px;background:#fff}
+    .payment-method:hover{border-color:var(--brand);box-shadow:0 8px 20px rgba(0,53,128,.12);transform:translateY(-1px)}
+    .payment-method.selected{border-color:var(--brand);background:#f7faff;box-shadow:0 8px 20px rgba(0,53,128,.15)}
+    .method-icon{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
+    .vnpay-icon{background:linear-gradient(135deg,var(--brand-mid) 0%,var(--accent) 100%)}
+    .cash-icon{background:linear-gradient(135deg,#16a085 0%,#27ae60 100%)}
+    .method-info{flex:1}
+    .method-info h3{margin:0 0 6px 0;font-size:16px;font-weight:800;color:#21325b}
+    .method-info p{margin:0 0 4px 0;color:#51618a;font-size:14px}
+    .supported-banks small{color:#7a88a8;font-size:12px}
+    .form-group{margin-bottom:14px}
+    .form-label{display:block;font-size:13px;font-weight:700;color:#344366;margin-bottom:6px}
+    .form-input,.detail-form-input{width:100%;padding:12px 12px;border:1px solid #d9e4ff;border-radius:10px;font-size:14px;transition:border-color .2s, box-shadow .2s;background:#fff}
+    .form-input:focus,.detail-form-input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(0,53,128,.08)}
+    .checkout-button{width:100%;padding:16px 22px;background:linear-gradient(135deg,var(--brand-mid) 0%,var(--accent) 100%);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;transition:transform .15s, box-shadow .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px;box-shadow:0 12px 26px rgba(0,53,128,.25)}
+    .checkout-button:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(0,53,128,.3)}
+    .checkout-button:active{transform:translateY(0)}
+    .order-summary{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;height:max-content;position:sticky;top:20px;box-shadow:var(--shadow)}
+    .summary-title{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .booking-item{border:1px solid #eef2ff;background:#fbfdff;border-radius:12px;padding:12px;margin-bottom:12px}
+    .item-header{display:flex;gap:12px}
+    .item-icon{width:36px;height:36px;border-radius:10px;background:#eaf1ff;display:flex;align-items:center;justify-content:center;color:var(--brand)}
+    .item-info h4{margin:0 0 4px 0;font-size:16px;color:#1f2b48;font-weight:800}
+    .item-info p{margin:0;color:#6c7aa6;font-size:13px}
+    .room-specs{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+    .spec-item{font-size:12px;color:#6b7796;display:flex;align-items:center;gap:6px}
+    .price-breakdown{border-top:1px solid #eef2ff;margin-top:10px;padding-top:12px}
+    .price-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;color:#2a3553}
+    .price-row.services-total{border-top:1px dashed #d9e4ff;margin-top:6px;padding-top:10px;color:var(--brand);font-weight:800}
+    .price-row.discount{color:#e53935;font-weight:800}
+    .price-row.total{font-size:18px;font-weight:900;color:#122041;border-top:2px solid #eaf0ff;margin-top:6px;padding-top:10px}
+    .payment-security-info{margin-top:16px;padding:12px;background:#f7faff;border-radius:10px;border:1px solid #eaf1ff}
+    .security-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:#536289}
+    .security-item i{color:var(--brand)}
+    .warning-inline{color:#e53935;font-size:14px;margin:10px 0;font-weight:800;display:flex;align-items:center;gap:8px}
+    .note-box{margin-top:16px;padding:14px;background:#f0f6ff;border-radius:10px;font-size:14px;color:#566487;border-left:4px solid var(--brand);display:flex;align-items:flex-start;gap:10px}
+    .note-box i{color:var(--brand);margin-top:2px}
+    .custom-alert{padding:14px 20px;border-radius:12px;margin-bottom:16px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:10px;background:#eaf4ff;color:#1863b8;border:1.5px solid #b3d8fd;box-shadow:var(--shadow)}
+    .custom-alert-success{background:#eafaf1;color:var(--ok);border-color:#b7e4c7}
+    .custom-alert-error{background:#fff0f0;color:var(--danger);border-color:#ffd6d6}
+    @media (max-width: 992px){
+        .payment-content{grid-template-columns:1fr}
+        .order-summary{position:relative;top:auto}
     }
 </style>
 
 <script>
-    function selectPaymentMethod(element, method) {
-        // Remove selected class from all methods
-        document.querySelectorAll('.payment-method').forEach(el => {
-            el.classList.remove('selected');
-            el.querySelector('.method-radio i').className = 'far fa-circle';
-            el.querySelector('.method-radio i').style.color = '#ccc';
-        });
+    function parseDateStr(s){ const [y,m,d]=(s||'').split('-').map(Number); return (y&&m&&d)?new Date(y,m-1,d):null; }
+    function calcNights(ci,co){ if(!ci||!co) return 0; const ms=co-ci; let n=Math.floor(ms/86400000); if(n<1) n=1; return n; }
 
-        // Add selected class to clicked method
-        element.classList.add('selected');
-        element.querySelector('.method-radio i').className = 'fas fa-check-circle';
-        element.querySelector('.method-radio i').style.color = '#003580';
+    function updateOrderSummary(){
+        const ci = parseDateStr(document.getElementById('checkin-date').value);
+        const co = parseDateStr(document.getElementById('checkout-date').value);
+        const nights = calcNights(ci,co);
 
-        // Update hidden input and button text
-        document.getElementById('payment_method').value = method;
-        const checkoutText = document.getElementById('checkout-text');
-        const checkoutBtn = document.getElementById('checkout-btn');
+        const pricePerNight = {{ (int)($roomType->base_price ?? 0) }};
+        const servicesTotal = {{ (int)($services_total ?? 0) }};
+        const discountAmount = {{ (int)($discount_amount ?? 0) }};
 
-        switch (method) {
-            case 'vnpay':
-                checkoutText.textContent = 'Thanh toán VNPay';
-                checkoutBtn.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
-                break;
-            case 'momo':
-                checkoutText.textContent = 'Thanh toán MoMo';
-                checkoutBtn.style.background = 'linear-gradient(135deg, #a21caf 0%, #ec4899 100%)';
-                break;
-            case 'bank':
-                checkoutText.textContent = 'Chuyển khoản ngân hàng';
-                checkoutBtn.style.background = 'linear-gradient(135deg, #047857 0%, #10b981 100%)';
-                break;
+        const roomPrice = pricePerNight * (nights||0);
+        const finalTotal = Math.max(0, roomPrice - discountAmount + servicesTotal);
+
+        document.getElementById('order-checkin').textContent = document.getElementById('checkin-date').value || '...';
+        document.getElementById('order-checkout').textContent = document.getElementById('checkout-date').value || '...';
+        document.getElementById('order-nights').textContent = nights||0;
+        document.getElementById('order-nights2').textContent = nights||0;
+        document.getElementById('order-room-price').textContent = roomPrice.toLocaleString('vi-VN')+'₫';
+        document.getElementById('order-total').textContent = finalTotal.toLocaleString('vi-VN')+'₫';
+
+        // đồng bộ hidden input gửi đi
+        document.querySelector('input[name="checkin"]').value = document.getElementById('checkin-date').value || '{{ $checkin ?? "" }}';
+        document.querySelector('input[name="checkout"]').value = document.getElementById('checkout-date').value || '{{ $checkout ?? "" }}';
+        document.querySelector('input[name="total_price"]').value = finalTotal;
+    }
+
+    function selectPaymentMethodByRadio(){
+        const vnpChecked=document.getElementById('pm_vnpay').checked;
+        const vnpCard=document.querySelector('[for="pm_vnpay"]');
+        const cashCard=document.querySelector('[for="pm_cash"]');
+
+        vnpCard.classList.toggle('selected',vnpChecked);
+        cashCard.classList.toggle('selected',!vnpChecked);
+
+        vnpCard.querySelector('.method-radio i').className= vnpChecked?'fas fa-check-circle':'far fa-circle';
+        vnpCard.querySelector('.method-radio i').style.color= vnpChecked?'#003580':'#ccc';
+
+        cashCard.querySelector('.method-radio i').className= vnpChecked?'far fa-circle':'fas fa-check-circle';
+        cashCard.querySelector('.method-radio i').style.color= vnpChecked?'#ccc':'#003580';
+
+        const checkoutText=document.getElementById('checkout-text');
+        const checkoutBtn=document.getElementById('checkout-btn');
+        if(vnpChecked){
+            checkoutText.textContent='Thanh toán VNPay';
+            checkoutBtn.style.background='linear-gradient(135deg,#1e3c72 0%,#2a5298 100%)';
+        }else{
+            checkoutText.textContent='Đặt phòng - Trả tiền mặt';
+            checkoutBtn.style.background='linear-gradient(135deg,#16a085 0%,#27ae60 100%)';
         }
     }
 
-    function updateOrderSummary() {
-        const checkin = document.getElementById('checkin-date').value;
-        const checkout = document.getElementById('checkout-date').value;
-        const pricePerNight = {
-            {
-                $room - > price_per_night ?? 0
-            }
-        };
+    window.addEventListener('DOMContentLoaded',function(){
+        // set mặc định theo old()
+        const defaultMethod='{{ old("payment_method","vnpay") }}';
+        document.getElementById(defaultMethod==='cash'?'pm_cash':'pm_vnpay').checked=true;
+        selectPaymentMethodByRadio();
 
-        let nights = 0;
-        if (checkin && checkout) {
-            nights = (new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24);
-            if (nights < 1) nights = 1;
-        }
+        document.getElementById('pm_vnpay').addEventListener('change',selectPaymentMethodByRadio);
+        document.getElementById('pm_cash').addEventListener('change',selectPaymentMethodByRadio);
 
-        document.getElementById('order-checkin').textContent = checkin;
-        document.getElementById('order-checkout').textContent = checkout;
-        document.getElementById('order-nights').textContent = nights;
-        document.getElementById('order-nights2').textContent = nights;
-        document.getElementById('order-room-price').textContent = (pricePerNight * nights).toLocaleString('vi-VN') + '₫';
-        document.getElementById('order-total').textContent = (pricePerNight * nights).toLocaleString('vi-VN') + '₫';
-    }
+        document.getElementById('checkin-date').addEventListener('change',updateOrderSummary);
+        document.getElementById('checkout-date').addEventListener('change',updateOrderSummary);
 
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo lại tổng (trường hợp controller đã tính sẵn)
         updateOrderSummary();
-        // Set default payment method
-        selectPaymentMethod(document.querySelector('.payment-method.selected'), 'vnpay');
+
+        document.getElementById('payment-form').addEventListener('submit',function(){
+            // đảm bảo hidden cập nhật cuối
+            updateOrderSummary();
+        });
     });
 </script>
+
 @endsection

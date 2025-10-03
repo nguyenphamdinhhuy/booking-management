@@ -17,12 +17,27 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'avatar',
+        'status',
+        'email_verified_at',
+        'google_id',
+        'remember_token',
+        'is_verification_enabled',
+        'phone',
+        'address',
+        'gender',
+        'dob',
+        'start_date',
+        'citizen_id',
+        'issue_date',
+        'issue_place',
+        'id_card_front',
+        'id_card_back',
+        'contract_type',
+        'salary',
         'notification_email',
         'notification_sms',
         'language',
         'timezone',
-        'status',
-        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -34,19 +49,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'dob' => 'date',
+            'start_date' => 'date',
+            'issue_date' => 'date',
+            'is_verification_enabled' => 'boolean',
             'notification_email' => 'boolean',
             'notification_sms' => 'boolean',
+            'password' => 'hashed',
         ];
     }
 
     // Accessor cho avatar
     public function getAvatarAttribute($value)
     {
-        if ($value) {
-            return $value;
-        }
-        return asset('images/default-avatar.png');
+        return $value ?: asset('images/default-avatar.png');
     }
 
     // Mutator cho language

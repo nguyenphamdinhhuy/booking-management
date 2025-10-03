@@ -43,6 +43,7 @@ class PendingRegisterController extends Controller
             'name' => $pending->name,
             'email' => $pending->email,
             'password' => $pending->password,
+            'email_verify_at' => now(),
         ]);
 
         $pending->delete();

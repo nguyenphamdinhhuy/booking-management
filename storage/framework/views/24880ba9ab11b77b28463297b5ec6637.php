@@ -32,7 +32,7 @@
             </div>
             <div class="detail-feature">
                 <i class="fas fa-bed"></i>
-                <span><?php echo e($room->number_of_beds ?? '2'); ?> giường</span>
+                <span><?php echo e($room->number_beds ?? '2'); ?> giường</span>
             </div>
             <div class="detail-feature">
                 <i class="fas fa-wifi"></i>
@@ -47,9 +47,27 @@
 
     <!-- Image Gallery -->
     <div class="detail-image-gallery">
-        <div class="detail-single-image" id="room-image">
-            <img src="<?php echo e(asset($room->images)); ?>" alt="<?php echo e($room->name); ?>" style="width:100%; border-radius:12px;">
-        </div>
+        <?php if(count($room->all_images) > 1): ?>
+            <!-- Multiple Images - Gallery Layout -->
+            <div class="detail-gallery-container">
+                <div class="detail-main-image">
+                    <img src="<?php echo e(asset($room->main_image)); ?>" alt="<?php echo e($room->name); ?>" id="main-display-image">
+                </div>
+                <div class="detail-thumbnail-grid">
+                    <?php $__currentLoopData = $room->all_images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="detail-thumbnail <?php echo e($index === 0 ? 'active' : ''); ?>" 
+                             onclick="changeMainImage('<?php echo e(asset($image)); ?>', this)">
+                            <img src="<?php echo e(asset($image)); ?>" alt="<?php echo e($room->name); ?> - Ảnh <?php echo e($index + 1); ?>">
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            </div>
+        <?php else: ?>
+            <!-- Single Image -->
+            <div class="detail-single-image" id="room-image">
+                <img src="<?php echo e(asset($room->main_image)); ?>" alt="<?php echo e($room->name); ?>" style="width:100%; border-radius:12px;">
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Main Content -->
@@ -145,7 +163,7 @@
         <div class="related-rooms-grid">
             <?php $__empty_1 = true; $__currentLoopData = $relatedRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="related-room-card">
-                <img src="<?php echo e(asset($item->images)); ?>" alt="<?php echo e($item->name); ?>" class="related-room-image">
+                <img src="<?php echo e(asset($item->main_image)); ?>" alt="<?php echo e($item->name); ?>" class="related-room-image">
                 <div class="related-room-info">
                     <h4 class="related-room-name"><?php echo e($item->name); ?></h4>
                     <p class="related-room-price"><?php echo e($item->formatted_price); ?></p>
@@ -160,16 +178,27 @@
     </div>
 
 </div>
+
 <script>
+    // Function to change main image when thumbnail is clicked
+    function changeMainImage(imageSrc, thumbnailElement) {
+        document.getElementById('main-display-image').src = imageSrc;
+        
+        // Remove active class from all thumbnails
+        document.querySelectorAll('.detail-thumbnail').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        
+        // Add active class to clicked thumbnail
+        thumbnailElement.classList.add('active');
+    }
+
     // Tính tổng giá trị đơn hàng khi submit (giả sử đơn giá * số đêm)
     document.querySelector('.detail-booking-form').onsubmit = function(e) {
         const checkin = document.getElementById('checkin-date').value;
         const checkout = document.getElementById('checkout-date').value;
-        const pricePerNight = {
-            {
-                $room - > price_per_night
-            }
-        };
+        const pricePerNight = <?php echo e($room->price_per_night); ?>;
+        
         if (checkin && checkout) {
             const nights = (new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24);
             document.getElementById('total-price-hidden').value = nights > 0 ? nights * pricePerNight : pricePerNight;
@@ -187,5 +216,159 @@
         return true;
     }
 </script>
+
+<style>
+/* Gallery Styles - Improved Layout */
+.detail-gallery-container {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+.detail-main-image {
+    width: 100%;
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.detail-main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.detail-main-image img:hover {
+    transform: scale(1.05);
+}
+
+.detail-thumbnail-grid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 5px 0;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+.detail-thumbnail-grid::-webkit-scrollbar {
+    height: 6px;
+}
+
+.detail-thumbnail-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.detail-thumbnail-grid::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.detail-thumbnail-grid::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.detail-thumbnail {
+    min-width: 100px;
+    width: 100px;
+    height: 70px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.detail-thumbnail.active {
+    border-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+}
+
+.detail-thumbnail:hover {
+    border-color: #007bff;
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+
+.detail-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .detail-thumbnail-grid {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        max-height: none;
+    }
+    
+    .detail-thumbnail {
+        min-width: 120px;
+        width: 120px;
+        height: 85px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .detail-gallery-container {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .detail-main-image {
+        flex: 1;
+        height: 500px;
+        max-width: calc(100% - 160px);
+    }
+    
+    .detail-thumbnail-grid {
+        flex-direction: column;
+        width: 140px;
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex-wrap: nowrap;
+        scrollbar-width: thin;
+    }
+    
+    .detail-thumbnail-grid::-webkit-scrollbar {
+        width: 6px;
+        height: auto;
+    }
+    
+    .detail-thumbnail {
+        min-width: 120px;
+        width: 120px;
+        height: 90px;
+        margin-bottom: 10px;
+    }
+    
+    .detail-thumbnail:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (min-width: 1200px) {
+    .detail-main-image {
+        max-width: calc(100% - 180px);
+    }
+    
+    .detail-thumbnail-grid {
+        width: 160px;
+    }
+    
+    .detail-thumbnail {
+        min-width: 140px;
+        width: 140px;
+        height: 100px;
+    }
+}
+</style>
+
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layout.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\F-poly\graduation_project\booking_laravel_project\booking_app\resources\views/user/room_detail.blade.php ENDPATH**/ ?>

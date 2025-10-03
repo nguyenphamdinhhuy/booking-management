@@ -55,7 +55,7 @@
                             <span>Thêm nhân viên</span>
                         </a></li>
                     <li class="admin-menu-divider"></li>
-                    <li><a href="<?php echo e(route('home')); ?>" class="admin-menu-item" target="_blank">
+                    <li><a href="<?php echo e(route('index')); ?>" class="admin-menu-item" target="_blank">
                             <i class="fas fa-external-link-alt"></i>
                             <span>Xem website</span>
                         </a></li>

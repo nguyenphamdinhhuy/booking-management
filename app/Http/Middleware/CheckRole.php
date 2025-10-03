@@ -14,7 +14,7 @@ class CheckRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $requiredRole): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (!Auth::check()) {
             return redirect('/login');
@@ -22,16 +22,10 @@ class CheckRole
 
         $userRole = Auth::user()->role;
 
-        // Admin được quyền vào mọi nơi
-        if ($userRole === 'admin') {
+        if (in_array($userRole, $roles)) {
             return $next($request);
         }
 
-        // Các vai trò khác phải đúng
-        if ($userRole !== $requiredRole) {
-            return redirect('/')->with('error', 'Bạn không có quyền truy cập.');
-        }
-
-        return $next($request);
+        return redirect('/')->with('error', 'Bạn không có quyền truy cập.');
     }
 }

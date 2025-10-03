@@ -35,7 +35,7 @@
                 <div class="history-status <?php echo e(strtolower($booking->status)); ?>">
                     <?php if($booking->status === 'confirmed'): ?> Đã xác nhận
                     <?php elseif($booking->status === 'completed'): ?> Hoàn thành
-                    <?php elseif($booking->status === 'confirmed'): ?> Đã hủy
+                    <?php elseif($booking->status === 'cancelled'): ?> Đã hủy
                     <?php endif; ?>
                 </div>
             </div>

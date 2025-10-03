@@ -142,19 +142,7 @@ class ProfileController extends Controller
     /**
      * Display the user's orders.
      */
-    public function orders(Request $request): View
-    {
-        $user = $request->user();
-        $isAdmin = $user->role === 'admin';
 
-        // TODO: Implement orders logic
-        return view('profile.orders', [
-            'user' => $user,
-            'isAdmin' => $isAdmin,
-            // 'layout' => $isAdmin ? 'admin.layouts.master' : 'layouts.app',
-            'orders' => [], // Add orders data here
-        ]);
-    }
 
     /**
      * Display the user's favorites.
@@ -411,7 +399,72 @@ class ProfileController extends Controller
         $user->save();
 
         return back()->with('success', 'Cập nhật trạng thái xác thực email thành công!');
-    }   
+    }
 
+    public function orders(Request $request): View
+    {
+        $user = $request->user();
+        $isAdmin = $user->role === 'admin';
 
+        // Lấy lịch sử đặt phòng của user
+        $orders = DB::table('booking as b')
+            ->join('booking_details as bd', 'b.b_id', '=', 'bd.b_id')
+            ->join('rooms as r', 'bd.r_id', '=', 'r.r_id')
+            ->select(
+                'b.b_id as id',
+                'b.check_in_date as checkin_date',
+                'b.check_out_date as checkout_date',
+                'b.status',
+                'b.total_price as price',
+                'b.created_at',
+                'b.payment_status',
+                'r.name as room_type',
+                'r.price_per_night',
+                'r.max_guests as guests',
+                'r.number_beds',
+                'r.images',
+                'bd.description as booking_description',
+                DB::raw("'Hotel Name' as hotel_name"),
+                DB::raw("'Hotel Address' as hotel_address"),
+                DB::raw("COALESCE((SELECT AVG(rating) FROM reviews WHERE bs_id = b.b_id), 0) as rating"),
+                DB::raw("0 as refund_price")
+            )
+            ->where('b.u_id', $user->id)
+            ->orderBy('b.created_at', 'desc')
+            ->get();
+
+        // Map lại dữ liệu để phù hợp view
+        $statusMap = [
+            0 => 'cancelled',
+            1 => 'confirmed',
+            2 => 'completed',
+        ];
+
+        $orders = $orders->map(function ($order) use ($user, $statusMap) {
+            $order->status = $statusMap[$order->status] ?? 'confirmed';
+
+            // Ảnh phòng
+            if ($order->images) {
+                $images = explode(',', $order->images);
+                $order->image_url = asset('storage/' . trim($images[0]));
+            }
+
+            // Ngày hủy
+            if ($order->status === 'cancelled') {
+                $order->canceled_at = $order->created_at;
+            }
+
+            // Kiểm tra đã đánh giá chưa
+            $order->has_reviewed = $order->status === 'completed'
+                ? DB::table('reviews')
+                ->where('bs_id', $order->id)
+                ->where('c_id', $user->id)
+                ->exists()
+                : false;
+
+            return $order;
+        });
+
+        return view('profile.orders', compact('user', 'isAdmin', 'orders'));
+    }
 }

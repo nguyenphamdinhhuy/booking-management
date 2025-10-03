@@ -12,9 +12,10 @@
     <div class="header-right">
         <div class="admin-dropdown">
             <div class="admin-trigger" onclick="toggleAdminDropdown()">
-                <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face' }}"
-                    alt="Admin Avatar" class="admin-avatar">
-
+                    <img src="{{ Str::startsWith(Auth::user()->avatar, 'http')
+    ? Auth::user()->avatar
+    : asset('storage/' . Auth::user()->avatar) }}" alt="Admin Avatar" class="admin-avatar-large" width="40px"
+                        height="40px">
                 <div class="admin-details">
                     <h4>{{ Auth::user()->name }}</h4>
                     <p>Quản trị viên</p>
@@ -23,8 +24,10 @@
             </div>
             <div class="admin-dropdown-menu" id="adminDropdown">
                 <div class="admin-header">
-                    <img src="{{ Auth::user()->avatar ?? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face' }}"
-                        alt="Admin Avatar" class="admin-avatar-large">
+                    <img src="{{ Str::startsWith(Auth::user()->avatar, 'http')
+    ? Auth::user()->avatar
+    : asset('storage/' . Auth::user()->avatar) }}" alt="Admin Avatar" class="admin-avatar-large" width="40px"
+                        height="40px">
                     <div class="admin-info">
                         <span>{{ Auth::user()->name }}</span>
                         <span>{{ Auth::user()->email }}</span>
@@ -55,7 +58,7 @@
                             <span>Thêm nhân viên</span>
                         </a></li>
                     <li class="admin-menu-divider"></li>
-                    <li><a href="{{ route('home') }}" class="admin-menu-item" target="_blank">
+                    <li><a href="{{ route('index') }}" class="admin-menu-item" target="_blank">
                             <i class="fas fa-external-link-alt"></i>
                             <span>Xem website</span>
                         </a></li>
@@ -81,7 +84,7 @@
     }
 
     // Đóng dropdown khi click bên ngoài
-    document.addEventListener('click', function (event) {
+    document.addEventListener('click', function(event) {
         const dropdown = document.getElementById('adminDropdown');
         const trigger = document.querySelector('.admin-trigger');
 

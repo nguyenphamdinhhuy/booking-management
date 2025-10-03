@@ -54,7 +54,7 @@
                     Phần Trăm Giảm Giá <span class="required">*</span>
                 </label>
                 <input type="number" id="discount_percent" name="discount_percent" class="form-input"
-                    value="{{ old('discount_percent') }}" min="0" max="100" step="0.01"
+                    value="{{ old('discount_percent') }}" min="0" max="75" step="0.5"
                     placeholder="Nhập phần trăm giảm giá (0-100)">
             </div>
 

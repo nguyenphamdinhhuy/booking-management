@@ -37,7 +37,7 @@
                 <div class="history-status {{ strtolower($booking->status) }}">
                     @if($booking->status === 'confirmed') Đã xác nhận
                     @elseif($booking->status === 'completed') Hoàn thành
-                    @elseif($booking->status === 'confirmed') Đã hủy
+                    @elseif($booking->status === 'cancelled') Đã hủy
                     @endif
                 </div>
             </div>

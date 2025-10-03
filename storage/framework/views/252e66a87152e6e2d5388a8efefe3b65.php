@@ -10,7 +10,6 @@
   .profile-menu li a:hover,
   .profile-menu li form button:hover {
     color: #007bff;
-    /* Màu chữ khi hover */
   }
 
   .profile-dropdown {
@@ -19,7 +18,6 @@
     right: 0;
     background: white;
     border-radius: 18px;
-    /* border: 1px solid #ccc; */
     display: none;
     z-index: 1000;
     min-width: 220px;
@@ -91,7 +89,7 @@
 <header class="bk-header">
   <div class="bk-header__bar">
     <div class="bk-header__left">
-      <a class="bk-header__logo" href="<?php echo e(route('home')); ?>">Hotel <span>Booking</span></a>
+      <a class="bk-header__logo" href="<?php echo e(route('index')); ?>">Hotel <span>Booking</span></a>
     </div>
 
     <nav class="bk-header__nav">

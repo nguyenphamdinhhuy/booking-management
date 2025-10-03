@@ -19,8 +19,6 @@
             <i class="fas fa-concierge-bell"></i>
             Quản lý loại dịch vụ
         </span>
-
-
     </h1>
 
 
@@ -38,30 +36,44 @@
         </div>
 
         <!-- Filter Bar -->
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label class="filter-label">Trạng thái</label>
-                <select class="filter-select" onchange="filterRooms()">
-                    <option value="">Tất cả</option>
-                    <option value="1">Hoạt động</option>
-                    <option value="0">Không hoạt động</option>
-                </select>
+        <form method="GET" action="{{ route('service-categories.index') }}">
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label class="filter-lable">Trạng thái</label>
+                    <select name="is_available" class="filter-select" onchange="this.form.submit()" id="">
+                        <option value="" {{ request('is_available') === null || request('is_available') === '' ? 'selected' : '' }}>Tất cả</option>
+                        <option value="1" {{ request('is_available') === '1' ? 'selected' : '' }}>Hoạt động</option>
+                        <option value="0" {{ request('is_available') === '0' ? 'selected' : '' }}>Ngưng</option>
+
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Loại Dịnh vụ</label>
+                    <select name="id" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        @foreach ($service_Category as $cat)
+                            <option value="{{ $cat->id }}" {{ request('id') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-lable" for="">Tìm kiếm</label>
+                    <input type="text" name="keyword" value="{{ request('keyword') }}" class="filter-input"
+                        placeholder="Ten loai dich vụ...">
+                </div>
+                <div class="filter-group" style="align-items: end;">
+                    <button type="button" class="btn btn-secondary" onclick="clear_Filters()">
+                        <i class="fas fa-times"></i> Xóa bộ lọc
+                    </button>
+                </div>
             </div>
-            <div class="filter-group">
-                <label class="filter-label">Loại dịch vụ</label>
-                <select class="filter-select" onchange="filterRooms()">
-                    <option value="">Tất cả</option>
-                    <option value="0-500000">Đưa đón</option>
-                    <option value="500000-1000000">Đặt đồ ăn</option>
-                    <option value="1000000-2000000">Tậm gym</option>
-                    <option value="2000000+">Ca hát</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">Tìm kiếm</label>
-                <input type="text" class="filter-input" placeholder="Tên phòng..." onkeyup="searchRooms(this.value)">
-            </div>
-        </div>
+        </form>
+
+
+
+
 
         <!-- Data Table -->
         <div class="table-responsive">
@@ -70,8 +82,9 @@
                     <tr>
                         <th>ID</th>
                         <th>Loại dịch vụ</th>
-                        <th>Mô tả</th>
                         <th>Hình ảnh</th>
+                        <th>Mô tả</th>
+                        <th>Trạng thái</th>
                         <th>Ngày tạo</th>
                         <th>Thao tác</th>
                     </tr>
@@ -81,13 +94,18 @@
                         <tr>
                             <td>{{ $cat->id }}</td>
                             <td>{{ $cat->name }}</td>
-                            <td>{{ $cat->description }}</td>
                             <td>
                                 @if($cat->image)
-                                    <img src="{{ asset($cat->image) }}" with="80" height="80" alt="">
+                                    <img src="{{ asset($cat->image) }}" with="80" height="60" alt="">
                                 @else
                                     Khong anh
                                 @endif
+                            </td>
+                            <td>{{ $cat->description }}</td>
+                            <td>
+                                <span class="status-badge {{ $cat->is_available ? 'status-active' : 'status-inactive' }}">
+                                    {{ $cat->is_available ? '✅' : '❌' }}
+                                </span>
                             </td>
                             <td>{{ $cat->created_at ? $cat->created_at->format('d/m/Y') : '' }}</td>
                             <td>
@@ -111,6 +129,15 @@
                     @endforeach
             </table>
         </div>
+        <div class="d-flex justify-content-center mt-3">
+            {{ $categories->links('pagination::bootstrap-4') }}
+        </div>
+        <script>
+            function clear_Filters() {
+                // Điều hướng về trang index mặc định, không có query string
+                window.location.href = "{{ route('service-categories.index') }}";
+            }
+        </script>
     </div>
 
 @endsection

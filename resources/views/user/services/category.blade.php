@@ -10,7 +10,7 @@
     <nav class="flex mb-8" aria-label="Breadcrumb">
         <ol class="inline-flexitems-center space-x-1 md:space-x-3">
             <li class="inline-flex items-center">
-                <a href="{{ route('home') }}"
+                <a href="{{ route('index') }}"
                     class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
                     <i class="fas fa-home mr-2"></i>
                     Trang chủ
@@ -49,9 +49,9 @@
                 <i class="fas fa-tag text-blue-600 text-xl mr-3"></i>
                 <span class="text-blue-800 font-medium">{{ $services->total() }} dịch vụ có sẵn</span>
             </div>
-            <a href="{{ route('user.services.index') }}" class="action-btn action-btn-primary">
+            <!-- <a href="{{ route('user.services.index') }}" class="action-btn action-btn-primary">
                 <i class="fas fa-arrow-left mr-2"></i>Xem tất cả dịch vụ
-            </a>
+            </a> -->
         </div>
     </div>
 

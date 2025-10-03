@@ -51,7 +51,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="<?php echo e(route('staff.show')); ?>" class="nav-link">
                 <i class="fas fa-user-tie"></i>
                 <span>Quản lý nhân viên</span>
             </a>

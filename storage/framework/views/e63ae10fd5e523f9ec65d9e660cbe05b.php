@@ -42,14 +42,24 @@
         color: #856404;
     }
 
+    .status-waiting-admin {
+        background-color: #e3f2fd;
+        color: #1565c0;
+    }
+
     .status-confirmed {
-        background-color: #d4edda;
-        color: #155724;
+        background-color: #fff3e0;
+        color: #ef6c00;
+    }
+
+    .status-checkedin {
+        background-color: #fce4ec;
+        color: #c2185b;
     }
 
     .status-completed {
-        background-color: #d1ecf1;
-        color: #0c5460;
+        background-color: #d4edda;
+        color: #155724;
     }
 
     .status-cancelled {
@@ -89,11 +99,7 @@
         margin-bottom: 10px;
     }
 
-    .room-description {
-        color: #666;
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
+
 
     .room-features {
         display: flex;
@@ -225,6 +231,15 @@
         background: #218838;
     }
 
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .btn-warning:hover {
+        background: #e0a800;
+    }
+
     .btn-secondary {
         background: #6c757d;
         color: white;
@@ -320,13 +335,27 @@
     <div class="booking-header">
         <h1>Chi tiết đặt phòng</h1>
         <div class="booking-id">Mã đặt phòng: #<?php echo e($booking->b_id); ?></div>
-        <div class="status-badge status-<?php echo e($booking->status == 0 ? 'pending' : ($booking->status == 1 ? 'confirmed' : 'completed')); ?>">
+        <div class="status-badge 
+            <?php if($booking->status == 0): ?> status-pending
+            <?php elseif($booking->status == 1): ?> status-waiting-admin  
+            <?php elseif($booking->status == 2): ?> status-confirmed
+            <?php elseif($booking->status == 3): ?> status-checkedin
+            <?php elseif($booking->status == 4): ?> status-completed
+            <?php else: ?> status-cancelled
+            <?php endif; ?>">
+
             <?php if($booking->status == 0): ?>
-            🕐 Chờ xác nhận
+            🕐 Chờ thanh toán
             <?php elseif($booking->status == 1): ?>
-            ✅ Đã xác nhận
+            ⏳ Chờ khách sạn xác nhận
+            <?php elseif($booking->status == 2): ?>
+            🔑 Đã xác nhận - Có thể nhận phòng
+            <?php elseif($booking->status == 3): ?>
+            🛏️ Đã nhận phòng - Chờ trả phòng
+            <?php elseif($booking->status == 4): ?>
+            ✅ Đã hoàn thành
             <?php else: ?>
-            🏁 Đã hoàn thành
+            ❌ Đã hủy
             <?php endif; ?>
         </div>
     </div>
@@ -335,23 +364,30 @@
         <!-- Thông tin chính -->
         <div class="main-info">
             <div class="room-info">
-                <img src="<?php echo e(asset($booking->images)); ?>" alt="Room Image" class="room-image">
+                <!-- Hiển thị ảnh phòng - sử dụng đúng tên field từ controller -->
+                <?php if($booking->images): ?>
+                <img src="<?php echo e(asset($booking->images)); ?>" alt="Room Image" class="room-image" onerror="this.src='<?php echo e(asset('assets/images/default-room.jpg')); ?>'">
+                <?php else: ?>
+                <img src="<?php echo e(asset('assets/images/default-room.jpg')); ?>" alt="Default Room Image" class="room-image">
+                <?php endif; ?>
 
-                <h2 class="room-name"><?php echo e($booking->room_name); ?></h2>
+                <!-- Tên phòng - sử dụng đúng tên field từ controller -->
+                <h2 class="room-name"><?php echo e($booking->room_name ?? $booking->name ?? 'Tên phòng không xác định'); ?></h2>
 
-                <p class="room-description"><?php echo e($booking->room_description); ?></p>
+
 
                 <div class="room-features">
                     <div class="feature">
                         <span class="feature-icon">👥</span>
-                        <span>Tối đa <?php echo e($booking->max_guests); ?> khách</span>
+                        <span>Tối đa <?php echo e($booking->max_guests ?? 'N/A'); ?> khách</span>
                     </div>
                     <div class="feature">
                         <span class="feature-icon">🛏️</span>
-                        <span><?php echo e($booking->number_beds); ?> giường</span>
+                        <span><?php echo e($booking->number_beds ?? 'N/A'); ?> giường</span>
                     </div>
                 </div>
 
+                <!-- Ghi chú đặt phòng -->
                 <?php if($booking->booking_description): ?>
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
                     <strong>Ghi chú đặt phòng:</strong>
@@ -374,74 +410,223 @@
                     </div>
                 </div>
 
-                <div class="nights-info">
-                    <span class="nights-number"><?php echo e(\Carbon\Carbon::parse($booking->check_in_date)->diffInDays($booking->check_out_date)); ?></span>
+                <!-- Tính số đêm -->
+                <?php
+                $nights = \Carbon\Carbon::parse($booking->check_in_date)->diffInDays($booking->check_out_date);
+                if ($nights < 1) $nights=1;
+                    ?>
+                    <div class="nights-info">
+                    <span class="nights-number"><?php echo e($nights); ?></span>
                     <span class="nights-text">đêm lưu trú</span>
-                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Thông tin tóm tắt -->
-        <div class="booking-summary">
-            <h3 class="summary-title">Tóm tắt đặt phòng</h3>
+    <!-- Thông tin tóm tắt -->
+    <div class="booking-summary">
+        <h3 class="summary-title">Tóm tắt đặt phòng</h3>
 
-            <div class="summary-item">
-                <span class="summary-label">Giá phòng/đêm</span>
-                <span class="summary-value"><?php echo e(number_format($booking->price_per_night, 0, ',', '.')); ?> VNĐ</span>
-            </div>
+        <div class="summary-item">
+            <span class="summary-label">Giá phòng/đêm</span>
+            <span class="summary-value"><?php echo e(number_format($booking->price_per_night, 0, ',', '.')); ?> VNĐ</span>
+        </div>
 
-            <div class="summary-item">
-                <span class="summary-label">Số đêm</span>
-                <span class="summary-value"><?php echo e(\Carbon\Carbon::parse($booking->check_in_date)->diffInDays($booking->check_out_date)); ?> đêm</span>
-            </div>
+        <div class="summary-item">
+            <span class="summary-label">Số đêm</span>
+            <span class="summary-value"><?php echo e($nights); ?> đêm</span>
+        </div>
 
-            <div class="summary-item">
-                <span class="summary-label">Ngày đặt</span>
-                <span class="summary-value"><?php echo e(\Carbon\Carbon::parse($booking->created_at)->format('d/m/Y H:i')); ?></span>
-            </div>
+        <div class="summary-item">
+            <span class="summary-label">Ngày đặt</span>
+            <span class="summary-value"><?php echo e(\Carbon\Carbon::parse($booking->created_at)->format('d/m/Y H:i')); ?></span>
+        </div>
 
-            <div class="summary-item">
-                <span class="summary-label">Trạng thái thanh toán</span>
-                <span class="summary-value">
-                    <?php if($booking->payment_status == 1): ?>
-                    <span style="color: #28a745;">✅ Đã thanh toán</span>
-                    <?php else: ?>
-                    <span style="color: #dc3545;">❌ Chưa thanh toán</span>
-                    <?php endif; ?>
-                </span>
-            </div>
-
-            <div class="summary-item">
-                <span class="summary-label">Tổng tiền</span>
-                <span class="summary-value"><?php echo e(number_format($booking->total_price, 0, ',', '.')); ?> VNĐ</span>
-            </div>
-
-            <!-- Action buttons -->
-            <div class="action-buttons">
-                <?php if($booking->status == 0 && $booking->payment_status == 1): ?>
-                <button class="btn btn-secondary" disabled>
-                    🕐 Chờ xác nhận từ khách sạn
-                </button>
-                <?php elseif($booking->status == 1): ?>
-                <form action="<?php echo e(route('booking.confirm.checkout', $booking->b_id)); ?>" method="POST">
-                    <?php echo csrf_field(); ?>
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Xác nhận bạn đã trả phòng?')">
-                        ✅ Xác nhận trả phòng
-                    </button>
-                </form>
-                <?php elseif($booking->status == 2): ?>
-                <button class="btn btn-primary" disabled>
-                    🏁 Đã hoàn thành
-                </button>
+        <div class="summary-item">
+            <span class="summary-label">Trạng thái thanh toán</span>
+            <span class="summary-value">
+                <?php if($booking->payment_status == 1): ?>
+                <span style="color: #28a745;">✅ Đã thanh toán</span>
+                <?php else: ?>
+                <span style="color: #dc3545;">❌ Chưa thanh toán</span>
                 <?php endif; ?>
+            </span>
+        </div>
 
-                <a href="<?php echo e(route('booking.history', ['userId' => auth()->id()])); ?>" class="btn btn-secondary">
-                    ← Quay lại lịch sử
-                </a>
+        <div class="summary-item">
+            <span class="summary-label">Tổng tiền</span>
+            <span class="summary-value"><?php echo e(number_format($booking->total_price, 0, ',', '.')); ?> VNĐ</span>
+        </div>
+
+        <!-- Action buttons theo status của controller -->
+        <div class="action-buttons">
+            
+            <?php if($booking->status == 0): ?>
+            <button class="btn btn-warning" disabled>
+                🕐 Chờ thanh toán
+            </button>
+
+            
+            <?php elseif($booking->status == 1): ?>
+            <button class="btn btn-secondary" disabled>
+                ⏳ Chờ khách sạn xác nhận đơn đặt phòng
+            </button>
+
+            <!-- Nút hủy đặt phòng cho user -->
+            <?php
+            $checkInTime = strtotime($booking->check_in_date);
+            $currentTime = time();
+            $timeUntilCheckIn = $checkInTime - $currentTime;
+            $canCancel = $timeUntilCheckIn >= 86400; // 24 giờ = 86400 giây
+            ?>
+
+            <?php if($canCancel): ?>
+            <button class="btn btn-danger" onclick="showCancelModal(<?php echo e($booking->b_id); ?>)">
+                ❌ Hủy đặt phòng
+            </button>
+            <?php else: ?>
+            <button class="btn btn-secondary" disabled title="Không thể hủy trong vòng 24h trước ngày nhận phòng">
+                ❌ Quá hạn hủy
+            </button>
+            <?php endif; ?>
+
+            
+            <?php elseif($booking->status == 2): ?>
+            <form action="<?php echo e(url('/booking-checkin/' . $booking->b_id)); ?>" method="POST">
+                <?php echo csrf_field(); ?>
+                <button type="submit" class="btn btn-success"
+                    onclick="return confirm('Xác nhận bạn đã nhận phòng?')">
+                    🔑 Xác nhận đã nhận phòng
+                </button>
+            </form>
+            <div style="background: #e8f5e8; padding: 12px; border-radius: 6px; font-size: 13px; color: #2e7d32; margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Đơn đặt phòng đã được khách sạn xác nhận. Bạn có thể nhận phòng từ 15:00 ngày <?php echo e(\Carbon\Carbon::parse($booking->check_in_date)->format('d/m/Y')); ?>.
+            </div>
+
+            
+            <?php elseif($booking->status == 3): ?>
+            <button class="btn btn-secondary" disabled>
+                🛏️ Đã nhận phòng - Chờ khách sạn xác nhận trả phòng
+            </button>
+            <div style="background: #fff3e0; padding: 12px; border-radius: 6px; font-size: 13px; color: #ef6c00; margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Bạn đã nhận phòng thành công. Vui lòng trả phòng trước 12:00 ngày <?php echo e(\Carbon\Carbon::parse($booking->check_out_date)->format('d/m/Y')); ?>.
+            </div>
+
+            
+            <?php elseif($booking->status == 4): ?>
+            <button class="btn btn-success" disabled>
+                ✅ Đã hoàn thành
+            </button>
+            <div style="background: #d4edda; padding: 12px; border-radius: 6px; font-size: 13px; color: #155724; margin-top: 10px;">
+                <i class="fas fa-check-circle"></i> Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi! Đơn đặt phòng đã hoàn tất.
+            </div>
+
+            
+            <?php else: ?>
+            <button class="btn btn-secondary" disabled>
+                ❌ Đã hủy
+            </button>
+            <?php endif; ?>
+
+            <!-- Nút quay lại -->
+            <a href="<?php echo e(route('booking.history', ['userId' => auth()->id()])); ?>" class="btn btn-secondary">
+                ← Quay lại lịch sử
+            </a>
+        </div>
+
+        <!-- Modal xác nhận hủy đặt phòng -->
+        <div id="cancelModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%;">
+                <h3 style="margin: 0 0 20px 0; color: #333;">Xác nhận hủy đặt phòng</h3>
+
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <strong>⚠️ Chính sách hủy đặt phòng:</strong>
+                    <ul style="margin: 10px 0 0 20px; color: #856404;">
+                        <li>Hủy trước 7 ngày: Hoàn 100% tiền</li>
+                        <li>Hủy trước 3 ngày: Hoàn 80% tiền</li>
+                        <li>Hủy trước 1 ngày: Hoàn 50% tiền</li>
+                        <li>Hủy trong 24h: Không hoàn tiền</li>
+                    </ul>
+                </div>
+
+                <?php
+                $totalPrice = $booking->total_price;
+                $checkInTime = strtotime($booking->check_in_date);
+                $currentTime = time();
+                $hoursUntilCheckIn = ($checkInTime - $currentTime) / 3600;
+
+                if ($hoursUntilCheckIn >= 168) { // 7 ngày
+                $refundAmount = $totalPrice;
+                $refundPercent = 100;
+                } elseif ($hoursUntilCheckIn >= 72) { // 3 ngày
+                $refundAmount = $totalPrice * 0.8;
+                $refundPercent = 80;
+                } elseif ($hoursUntilCheckIn >= 24) { // 1 ngày
+                $refundAmount = $totalPrice * 0.5;
+                $refundPercent = 50;
+                } else {
+                $refundAmount = 0;
+                $refundPercent = 0;
+                }
+                ?>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Tổng tiền đã thanh toán:</span>
+                        <strong><?php echo e(number_format($totalPrice, 0, ',', '.')); ?> VNĐ</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #28a745;">
+                        <span>Số tiền được hoàn lại (<?php echo e($refundPercent); ?>%):</span>
+                        <strong><?php echo e(number_format($refundAmount, 0, ',', '.')); ?> VNĐ</strong>
+                    </div>
+                </div>
+
+                <p style="color: #666; margin-bottom: 25px;">
+                    Bạn có chắc chắn muốn hủy đặt phòng này không? Thao tác này không thể hoàn tác.
+                </p>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="hideCancelModal()" class="btn btn-secondary">
+                        Không, giữ đặt phòng
+                    </button>
+                    <form id="cancelForm" method="POST" style="display: inline;">
+                        <?php echo csrf_field(); ?>
+                        <button type="submit" class="btn btn-danger">
+                            Có, hủy đặt phòng
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+</div>
+<style>
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
 
+    .btn-danger:hover {
+        background: #c82333;
+    }
+</style>
+
+<script>
+    function showCancelModal(bookingId) {
+        document.getElementById('cancelForm').action = '/booking/cancel/' + bookingId;
+        document.getElementById('cancelModal').style.display = 'block';
+    }
+
+    function hideCancelModal() {
+        document.getElementById('cancelModal').style.display = 'none';
+    }
+
+    // Đóng modal khi click outside
+    document.getElementById('cancelModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideCancelModal();
+        }
+    });
+</script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\F-poly\graduation_project\booking_laravel_project\booking_app\resources\views/user/booking_detail.blade.php ENDPATH**/ ?>

@@ -14,6 +14,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="{{ route('admin.roomType.index') }}" class="nav-link">
+                <i class="fas fa-hotel"></i>
+                <span>Quản lí loại phòng</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="{{ route('admin.rooms.management') }}" class="nav-link">
                 <i class="fas fa-bed"></i>
                 <span>Quản lý phòng</span>
@@ -33,7 +39,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('statistical.index') }}" class="nav-link">
                 <i class="fas fa-chart-line"></i>
                 <span>Báo cáo & Thống kê</span>
             </a>
@@ -51,28 +57,31 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('admin.contacts.index') }}" class="nav-link">
+                <i class="fas fa-bell"></i>
+                <span>Liên hệ</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('staff.show') }}" class="nav-link">
                 <i class="fas fa-user-tie"></i>
                 <span>Quản lý nhân viên</span>
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('admin.post.index') }}" class="nav-link">
                 <i class="fas fa-newspaper"></i>
                 <span>Quản lý bài viết</span>
             </a>
         </li>
+
+
         <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-cog"></i>
-                <span>Cài đặt hệ thống</span>
+            <a href="{{ route('admin.banner.index') }}" class="nav-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Quản Lý Banner</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-bell"></i>
-                <span>Thông báo</span>
-            </a>
-        </li>
+
     </ul>
 </nav>
